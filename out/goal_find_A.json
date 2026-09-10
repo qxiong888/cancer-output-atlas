@@ -1,0 +1,493 @@
+{
+  "goal": "Find public NSCLC pembrolizumab / Keytruda immunotherapy resources I can reuse",
+  "generated_at_utc": "2026-08-28T11:38:13Z",
+  "generated_at_shanghai": "2026-08-28T19:38:13+08:00",
+  "graph": "/workspace/cancer-output-atlas/out/link_graph.json",
+  "top_per_ods": 8,
+  "by_ods": {
+    "data": [
+      {
+        "output_id": "dataset:geo:GSE345124",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Combination of a CCL21-gene modified dendritic cell vaccine and pembrolizumab induces immune responses in non-small cell lung cancer [Bulk TCR-seq]",
+        "landing_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE345124",
+        "ids": [
+          "geo:GSE345124",
+          "bioproject:PRJNA1518857"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "immunotherapy",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.7,
+        "rank_score": 0.954,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 1
+      },
+      {
+        "output_id": "dataset:geo:GSE305086",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Blood gene expression under immunotherapy as potential biomarker for immune checkpoint blockade in non-small-cell lung cancer",
+        "landing_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE305086",
+        "ids": [
+          "geo:GSE305086",
+          "bioproject:PRJNA1304411"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "immunotherapy",
+          "nsclc"
+        ],
+        "profile_fit": 0.8,
+        "rank_score": 0.896,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 2
+      },
+      {
+        "output_id": "dataset:cbioportal:nsclc_mskcc_2018",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Non-Small Cell Lung Cancer (MSK, Cancer Cell 2018)",
+        "landing_url": "https://www.cbioportal.org/study/summary?id=nsclc_mskcc_2018",
+        "ids": [
+          "cbioportal:nsclc_mskcc_2018",
+          "pmid:29657128"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "immunotherapy",
+          "nsclc"
+        ],
+        "profile_fit": 0.66,
+        "rank_score": 0.893,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 3
+      },
+      {
+        "output_id": "dataset:geo:GSE336428",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "dCas9-KRAB CRISPRi-mediated transcriptional repression of TERT in H1299 non-small cell lung cancer cells",
+        "landing_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE336428",
+        "ids": [
+          "geo:GSE336428",
+          "bioproject:PRJNA1442345"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "nsclc"
+        ],
+        "profile_fit": 0.82,
+        "rank_score": 0.836,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 4
+      },
+      {
+        "output_id": "dataset:cbioportal:luad_oncosg_2020",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Lung Adenocarcinoma (OncoSG, Nat Genet 2020)",
+        "landing_url": "https://www.cbioportal.org/study/summary?id=luad_oncosg_2020",
+        "ids": [
+          "cbioportal:luad_oncosg_2020",
+          "pmid:32015526"
+        ],
+        "why": "标题含 lung adenocarcinoma",
+        "goal_overlap": [
+          "nsclc"
+        ],
+        "profile_fit": 0.6,
+        "rank_score": 0.832,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 lung adenocarcinoma",
+        "rank_in_ods": 5
+      },
+      {
+        "output_id": "dataset:cbioportal:alk_msk_2026",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Non-Small Cell Lung Cancer (MSK, 2026)",
+        "landing_url": "https://www.cbioportal.org/study/summary?id=alk_msk_2026",
+        "ids": [
+          "cbioportal:alk_msk_2026"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "nsclc"
+        ],
+        "profile_fit": 0.5,
+        "rank_score": 0.83,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 6
+      },
+      {
+        "output_id": "dataset:cbioportal:bm_nsclc_mskcc_2023",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Non-Small Cell Lung Cancer Brain Metastasis (MSK, Nat Commun 2023)",
+        "landing_url": "https://www.cbioportal.org/study/summary?id=bm_nsclc_mskcc_2023",
+        "ids": [
+          "cbioportal:bm_nsclc_mskcc_2023",
+          "pmid:37591896"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "nsclc"
+        ],
+        "profile_fit": 0.5,
+        "rank_score": 0.83,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 7
+      },
+      {
+        "output_id": "dataset:cbioportal:luad_broad",
+        "kind": "dataset",
+        "ods": "data",
+        "ods_zh": "数据",
+        "title": "Lung Adenocarcinoma (Broad, Cell 2012)",
+        "landing_url": "https://www.cbioportal.org/study/summary?id=luad_broad",
+        "ids": [
+          "cbioportal:luad_broad",
+          "pmid:22980975"
+        ],
+        "why": "标题含 lung adenocarcinoma",
+        "goal_overlap": [
+          "nsclc"
+        ],
+        "profile_fit": 0.5,
+        "rank_score": 0.83,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 lung adenocarcinoma",
+        "rank_in_ods": 8
+      }
+    ],
+    "trial_result": [
+      {
+        "output_id": "trial:nct:NCT03562871",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "IO102 With Pembrolizumab, With or Without Chemotherapy, as First-line Treatment of Metastatic NSCLC",
+        "landing_url": "https://clinicaltrials.gov/study/NCT03562871",
+        "ids": [
+          "nct:NCT03562871"
+        ],
+        "why": "标题含 pembrolizumab",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.7,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab",
+        "rank_in_ods": 1
+      },
+      {
+        "output_id": "trial:nct:NCT03625323",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "Combination Study With Soluble LAG-3 Fusion Protein Eftilagimod Alpha (IMP321) and Pembrolizumab in Patients With Previously Untreated Unresectable or Metastatic NSCLC, or Recurrent PD-X Refractory NSCLC or With Recurrent or Metastatic HNSCC",
+        "landing_url": "https://clinicaltrials.gov/study/NCT03625323",
+        "ids": [
+          "nct:NCT03625323"
+        ],
+        "why": "标题含 pembrolizumab",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.7,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab",
+        "rank_in_ods": 2
+      },
+      {
+        "output_id": "trial:nct:NCT03637803",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "Live Biotherapeutic Product MRx0518 and Pembrolizumab Combination Study in Solid Tumors",
+        "landing_url": "https://clinicaltrials.gov/study/NCT03637803",
+        "ids": [
+          "nct:NCT03637803"
+        ],
+        "why": "标题含 pembrolizumab",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.64,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab",
+        "rank_in_ods": 3
+      },
+      {
+        "output_id": "trial:nct:NCT03715205",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "Study to Evaluate the Safety of Pembrolizumab in Participants With Unresectable or Metastatic Melanoma or Non-small Cell Lung Cancer in India (MK-3475-593/KEYNOTE-593)",
+        "landing_url": "https://clinicaltrials.gov/study/NCT03715205",
+        "ids": [
+          "nct:NCT03715205"
+        ],
+        "why": "标题含 non small cell lung",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.7,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 non small cell lung",
+        "rank_in_ods": 4
+      },
+      {
+        "output_id": "trial:nct:NCT03849469",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "A Study of XmAb®22841 Monotherapy & in Combination w/ Pembrolizumab in Subjects w/ Selected Advanced Solid Tumors",
+        "landing_url": "https://clinicaltrials.gov/study/NCT03849469",
+        "ids": [
+          "nct:NCT03849469"
+        ],
+        "why": "标题含 pembrolizumab",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.8,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab",
+        "rank_in_ods": 5
+      },
+      {
+        "output_id": "trial:nct:NCT03881488",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "Study of CTX-471 as a Monotherapy or in Combination With Pembrolizumab in Patients Post PD-1/PD-L1 Inhibitors in Metastatic or Locally Advanced Malignancies",
+        "landing_url": "https://clinicaltrials.gov/study/NCT03881488",
+        "ids": [
+          "nct:NCT03881488"
+        ],
+        "why": "标题含 pembrolizumab",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.7,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab",
+        "rank_in_ods": 6
+      },
+      {
+        "output_id": "trial:nct:NCT04198766",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "Study of INBRX-106 and INBRX-106 in Combination With Pembrolizumab (Keytruda®) in Subjects With Locally Advanced or Metastatic Solid Tumors (Hexavalent OX40 Agonist)",
+        "landing_url": "https://clinicaltrials.gov/study/NCT04198766",
+        "ids": [
+          "nct:NCT04198766"
+        ],
+        "why": "标题含 pembrolizumab keytruda",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.7,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab keytruda",
+        "rank_in_ods": 7
+      },
+      {
+        "output_id": "trial:nct:NCT04332653",
+        "kind": "trial",
+        "ods": "trial_result",
+        "ods_zh": "试验结果",
+        "title": "NT-I7 (Efineptakin Alfa) in Combination With Pembrolizumab in Participants With Advanced Solid Tumors",
+        "landing_url": "https://clinicaltrials.gov/study/NCT04332653",
+        "ids": [
+          "nct:NCT04332653"
+        ],
+        "why": "标题含 pembrolizumab",
+        "goal_overlap": [
+          "immunotherapy",
+          "keytruda",
+          "nsclc",
+          "pembrolizumab"
+        ],
+        "profile_fit": 0.74,
+        "rank_score": 1.0,
+        "callability": "metadata_api",
+        "callability_zh": "可查目录",
+        "source_status": "fixture",
+        "why_short": "标题含 pembrolizumab",
+        "rank_in_ods": 8
+      }
+    ]
+  },
+  "first_look": [
+    {
+      "output_id": "trial:nct:NCT03562871",
+      "kind": "trial",
+      "ods": "trial_result",
+      "ods_zh": "试验结果",
+      "title": "IO102 With Pembrolizumab, With or Without Chemotherapy, as First-line Treatment of Metastatic NSCLC",
+      "landing_url": "https://clinicaltrials.gov/study/NCT03562871",
+      "ids": [
+        "nct:NCT03562871"
+      ],
+      "why": "标题含 pembrolizumab",
+      "goal_overlap": [
+        "immunotherapy",
+        "keytruda",
+        "nsclc",
+        "pembrolizumab"
+      ],
+      "profile_fit": 0.7,
+      "rank_score": 1.0,
+      "callability": "metadata_api",
+      "callability_zh": "可查目录",
+      "source_status": "fixture",
+      "why_short": "标题含 pembrolizumab",
+      "rank_in_ods": 1
+    },
+    {
+      "output_id": "trial:nct:NCT03625323",
+      "kind": "trial",
+      "ods": "trial_result",
+      "ods_zh": "试验结果",
+      "title": "Combination Study With Soluble LAG-3 Fusion Protein Eftilagimod Alpha (IMP321) and Pembrolizumab in Patients With Previously Untreated Unresectable or Metastatic NSCLC, or Recurrent PD-X Refractory NSCLC or With Recurrent or Metastatic HNSCC",
+      "landing_url": "https://clinicaltrials.gov/study/NCT03625323",
+      "ids": [
+        "nct:NCT03625323"
+      ],
+      "why": "标题含 pembrolizumab",
+      "goal_overlap": [
+        "immunotherapy",
+        "keytruda",
+        "nsclc",
+        "pembrolizumab"
+      ],
+      "profile_fit": 0.7,
+      "rank_score": 1.0,
+      "callability": "metadata_api",
+      "callability_zh": "可查目录",
+      "source_status": "fixture",
+      "why_short": "标题含 pembrolizumab",
+      "rank_in_ods": 2
+    },
+    {
+      "output_id": "trial:nct:NCT03637803",
+      "kind": "trial",
+      "ods": "trial_result",
+      "ods_zh": "试验结果",
+      "title": "Live Biotherapeutic Product MRx0518 and Pembrolizumab Combination Study in Solid Tumors",
+      "landing_url": "https://clinicaltrials.gov/study/NCT03637803",
+      "ids": [
+        "nct:NCT03637803"
+      ],
+      "why": "标题含 pembrolizumab",
+      "goal_overlap": [
+        "immunotherapy",
+        "keytruda",
+        "nsclc",
+        "pembrolizumab"
+      ],
+      "profile_fit": 0.64,
+      "rank_score": 1.0,
+      "callability": "metadata_api",
+      "callability_zh": "可查目录",
+      "source_status": "fixture",
+      "why_short": "标题含 pembrolizumab",
+      "rank_in_ods": 3
+    }
+  ],
+  "callability": {
+    "software_tool_method": {
+      "metadata_api": 0,
+      "runnable_workflow": 0,
+      "hosted_tool": 0,
+      "repo_only": 0,
+      "pointer_apply": 0
+    },
+    "all_shown": {
+      "metadata_api": 16,
+      "runnable_workflow": 0,
+      "hosted_tool": 0,
+      "repo_only": 0,
+      "pointer_apply": 0
+    }
+  }
+}

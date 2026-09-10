@@ -1,0 +1,534 @@
+{
+  "gs://arc-institute-virtual-cell-atlas/virtual-cell-challenge/2025/": {
+    "title": "Arc Institute Virtual Cell Challenge 2025 perturbation expression set (object-store pointer)",
+    "summary": "Public pointer to Arc's 2025 Virtual Cell Challenge single-cell perturbation expression data (H1 hESC; gene-silencing prediction task). Recorded as a landing URI only. This atlas never lists, streams, or downloads objects from the bucket.",
+    "kind_hint": "dataset",
+    "landing_url": "https://github.com/ArcInstitute/arc-virtual-cell-atlas/blob/main/virtual-cell-challenge/README.md",
+    "license_hint": "CC0 1.0 (as stated on Arc public pages; verify before reuse)",
+    "source_urls": [
+      "https://github.com/ArcInstitute/arc-virtual-cell-atlas",
+      "https://arcinstitute.org/tools/virtualcellatlas"
+    ],
+    "keywords": [
+      "virtual cell challenge",
+      "single-cell",
+      "gene expression",
+      "perturbation",
+      "hESC"
+    ],
+    "download": "forbidden"
+  },
+  "https://cancer.sanger.ac.uk/cosmic": {
+    "title": "COSMIC — Catalogue of Somatic Mutations in Cancer (apply-yourself pointer)",
+    "summary": "Public landing for COSMIC. This atlas does not scrape COSMIC tables or licensed mutation downloads. Apply for access on the COSMIC site if you need those data.",
+    "kind_hint": "dataset",
+    "landing_url": "https://cancer.sanger.ac.uk/cosmic",
+    "license_hint": "COSMIC license wall; not scraped",
+    "source_urls": [
+      "https://cancer.sanger.ac.uk/cosmic"
+    ],
+    "keywords": [
+      "somatic mutation",
+      "cancer",
+      "apply-yourself"
+    ],
+    "download": "forbidden",
+    "apply_yourself": true
+  },
+  "https://docs.humantumoratlas.org/data_access/portal/": {
+    "title": "HTAN / dbGaP controlled sequencing (apply-yourself pointer)",
+    "summary": "HTAN Level 1–2 sequencing is controlled access via dbGaP (docs name phs002371). This atlas never fetches dbGaP files or hospital PHI. Apply on dbGaP if you have an approved DAR. Recorded as a pointer so the graph shows where to apply, not the data.",
+    "kind_hint": "dataset",
+    "landing_url": "https://docs.humantumoratlas.org/data_access/portal/",
+    "license_hint": "Controlled sequencing; apply via dbGaP",
+    "source_urls": [
+      "https://docs.humantumoratlas.org/data_access/portal/",
+      "https://humantumoratlas.org/data-access"
+    ],
+    "keywords": [
+      "HTAN",
+      "controlled sequencing",
+      "apply-yourself"
+    ],
+    "download": "forbidden",
+    "apply_yourself": true
+  },
+  "https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/": {
+    "title": "GDC BAM / controlled file download (apply-yourself pointer)",
+    "summary": "GDC project metadata is public; BAM and other sequencing files are often controlled (TCGA-LUAD BAM access=controlled was observed on 2026-08-27). This atlas never calls /data or /slicing and never downloads BAM. Apply via GDC/dbGaP for controlled files.",
+    "kind_hint": "dataset",
+    "landing_url": "https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/",
+    "license_hint": "GDC controlled files require authorization",
+    "source_urls": [
+      "https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/"
+    ],
+    "keywords": [
+      "GDC",
+      "BAM",
+      "controlled",
+      "apply-yourself"
+    ],
+    "download": "forbidden",
+    "apply_yourself": true
+  },
+  "https://arcinstitute.org/tools/virtualcellatlas": {
+    "title": "Arc Virtual Cell Atlas",
+    "summary": "The Arc Virtual Cell Atlas is a collection of high quality, curated, open datasets assembled for the purpose of accelerating the creation of virtual cell models. The Atlas includes both observational and perturbational data from over 600 million cells (and growing). First released in February 2025, the Atlas includes Tahoe’s Tahoe-100M, Arc’s AI agent-curated scBaseCount dataset, and the Virtual Cell Challenge 2025 training, validation, and held-out test perturbation datasets.",
+    "kind_hint": "dataset",
+    "landing_url": "https://arcinstitute.org/tools/virtualcellatlas",
+    "license_hint": "CC0 1.0 (as stated on Arc public pages; verify before reuse)",
+    "source_urls": [
+      "https://arcinstitute.org/tools/virtualcellatlas",
+      "https://github.com/ArcInstitute/arc-virtual-cell-atlas"
+    ],
+    "keywords": [
+      "virtual cell",
+      "virtual cell atlas",
+      "virtual cell challenge",
+      "Tahoe-100M",
+      "scBaseCount",
+      "perturbation",
+      "single-cell"
+    ],
+    "download": "forbidden"
+  },
+  "https://github.com/ArcInstitute/arc-virtual-cell-atlas": {
+    "title": "ArcInstitute/arc-virtual-cell-atlas",
+    "summary": "The Arc Virtual Cell Atlas is a collection of high quality, curated, open datasets assembled for the purpose of accelerating the creation of virtual cell models. The atlas includes both observational and perturbational data from over 602 million cells (and growing). The atlas is bootstrapped with Tahoe’s Tahoe-100M and Arc’s AI agent-curated scBaseCount dataset. Public README only; this atlas never lists or downloads gs:// objects.",
+    "kind_hint": "software",
+    "landing_url": "https://github.com/ArcInstitute/arc-virtual-cell-atlas",
+    "license_hint": "See repository LICENSE; object-store payloads not downloaded",
+    "source_urls": [
+      "https://github.com/ArcInstitute/arc-virtual-cell-atlas",
+      "https://arcinstitute.org/tools/virtualcellatlas"
+    ],
+    "keywords": [
+      "virtual cell",
+      "virtual cell atlas",
+      "github",
+      "Tahoe-100M",
+      "scBaseCount"
+    ],
+    "download": "forbidden"
+  },
+  "https://huggingface.co/datasets/tahoebio/Tahoe-100M": {
+    "title": "tahoebio/Tahoe-100M",
+    "summary": "Tahoe-100M is a giga-scale single-cell perturbation atlas consisting of over 100 million transcriptomic profiles from 50 cancer cell lines exposed to 1,100 small-molecule perturbations. Generated using Vevo Therapeutics' Mosaic high-throughput platform, Tahoe-100M enables deep, context-aware exploration of gene function, cellular states, and drug responses at unprecedented scale and resolution. This dataset is designed to power the development of next-generation AI models of cell biology, offering broad applications across systems biology, drug discovery, and precision medicine. Public Hugging Face dataset card only; expression matrices are not downloaded.",
+    "kind_hint": "dataset",
+    "landing_url": "https://huggingface.co/datasets/tahoebio/Tahoe-100M",
+    "license_hint": "cc0-1.0 (Hugging Face card); matrices not downloaded",
+    "source_urls": [
+      "https://huggingface.co/datasets/tahoebio/Tahoe-100M",
+      "https://arcinstitute.org/tools/virtualcellatlas"
+    ],
+    "keywords": [
+      "virtual cell",
+      "Tahoe-100M",
+      "tahoe",
+      "perturbation",
+      "single-cell",
+      "cancer cell lines"
+    ],
+    "download": "forbidden"
+  },
+  "https://projects.sanderlab.org/scperturb/": {
+    "title": "scPerturb — Single Cell Perturbation Datasets",
+    "summary": "scPerturb.org is a resource of standardized datasets reporting targeted perturbations with single-cell readouts and to facilitate the development and benchmarking of computational approaches in system biology.",
+    "kind_hint": "dataset",
+    "landing_url": "https://projects.sanderlab.org/scperturb/",
+    "license_hint": "See scPerturb / Zenodo records; h5ad files not downloaded",
+    "source_urls": [
+      "https://projects.sanderlab.org/scperturb/",
+      "https://scperturb.org/",
+      "https://github.com/sanderlab/scPerturb"
+    ],
+    "keywords": [
+      "virtual cell",
+      "scperturb",
+      "scPerturb",
+      "perturb-seq",
+      "single-cell",
+      "perturbation"
+    ],
+    "download": "forbidden"
+  },
+  "https://scperturb.org/": {
+    "title": "scPerturb.org — Single Cell Perturbation Datasets",
+    "summary": "scPerturb.org is a resource of standardized datasets reporting targeted perturbations with single-cell readouts and to facilitate the development and benchmarking of computational approaches in system biology.",
+    "kind_hint": "dataset",
+    "landing_url": "https://scperturb.org/",
+    "license_hint": "See scPerturb / Zenodo records; h5ad files not downloaded",
+    "source_urls": [
+      "https://scperturb.org/",
+      "https://projects.sanderlab.org/scperturb/",
+      "https://github.com/sanderlab/scPerturb"
+    ],
+    "keywords": [
+      "virtual cell",
+      "scperturb",
+      "scPerturb",
+      "perturb-seq",
+      "single-cell",
+      "perturbation"
+    ],
+    "download": "forbidden"
+  },
+  "https://github.com/sanderlab/scPerturb": {
+    "title": "sanderlab/scPerturb",
+    "summary": "scPerturb: A resource and a python tool for single-cell perturbation data. For the publication see: Peidli, S., Green, T.D., et al. Nature Methods (2024). The datasets are available to download on scperturb.org. A python package to compute E-distances in single-cell perturbation data and perform E-tests.",
+    "kind_hint": "software",
+    "landing_url": "https://github.com/sanderlab/scPerturb",
+    "license_hint": "See repository LICENSE",
+    "source_urls": [
+      "https://github.com/sanderlab/scPerturb",
+      "https://scperturb.org/"
+    ],
+    "keywords": [
+      "virtual cell",
+      "scperturb",
+      "scPerturb",
+      "perturbation",
+      "single-cell",
+      "software"
+    ],
+    "download": "forbidden"
+  },
+  "https://zenodo.org/records/13350497": {
+    "title": "scPerturb Single-Cell Perturbation Data: RNA and protein h5ad files",
+    "summary": "Collection of h5ad files for RNA and protein single-cell perturbation datasets on scPerturb.org. Version 1.4 adds more RNA datasets, corrects errors in SrivatsanTrapnell2020_sciplex3 and ShifrutMarson2018. For the associated publication, see https://www.nature.com/articles/s41592-023-02144-y. Public Zenodo landing only; h5ad payloads are not downloaded.",
+    "kind_hint": "dataset",
+    "landing_url": "https://zenodo.org/records/13350497",
+    "license_hint": "See Zenodo record; h5ad not downloaded",
+    "source_urls": [
+      "https://zenodo.org/records/13350497",
+      "https://scperturb.org/",
+      "https://github.com/sanderlab/scPerturb"
+    ],
+    "keywords": [
+      "virtual cell",
+      "scperturb",
+      "scPerturb",
+      "perturbation",
+      "single-cell"
+    ],
+    "download": "forbidden"
+  },
+  "https://github.com/ArcInstitute/arc-virtual-cell-atlas/blob/main/virtual-cell-challenge/README.md": {
+    "title": "Arc Virtual Cell Challenge 2025 datasets (public README)",
+    "summary": "For Arc’s Virtual Cell Challenge, we generated a dedicated dataset measuring single-cell responses to perturbations in a human embryonic stem cell line (H1 hESC). This set of perturbations was carefully curated to span a broad range of phenotypic responses, and experimental parameters were optimized to maximize the reproducibility of observed effects. The Atlas includes the training, validation, and held-out test perturbation datasets leveraged throughout the Challenge. Cell count: ~300,000 cells. Target genes: 300. Public README only; gs:// objects are never listed or downloaded.",
+    "kind_hint": "dataset",
+    "landing_url": "https://github.com/ArcInstitute/arc-virtual-cell-atlas/blob/main/virtual-cell-challenge/README.md",
+    "license_hint": "CC0 1.0 (as stated on Arc public pages; verify before reuse)",
+    "source_urls": [
+      "https://github.com/ArcInstitute/arc-virtual-cell-atlas/blob/main/virtual-cell-challenge/README.md",
+      "https://arcinstitute.org/tools/virtualcellatlas"
+    ],
+    "keywords": [
+      "virtual cell",
+      "virtual cell challenge",
+      "perturbation",
+      "hESC",
+      "single-cell"
+    ],
+    "download": "forbidden"
+  },
+  "https://doi.org/10.1016/j.cell.2022.05.013": {
+    "title": "Mapping information-rich genotype-phenotype landscapes with genome-scale Perturb-seq.",
+    "summary": "A central goal of genetics is to define the relationships between genotypes and phenotypes. High-content phenotypic screens such as Perturb-seq (CRISPR-based screens with single-cell RNA-sequencing readouts) enable massively parallel functional genomic mapping but, to date, have been used at limited scales. Here, we perform genome-scale Perturb-seq targeting all expressed genes with CRISPR interference (CRISPRi) across >2.5 million human cells. We use transcriptional phenotypes to predict the function of poorly characterized genes, uncovering new regulators of ribosome biogenesis (including CCDC86, ZNF236, and SPATA5L1), transcription (C7orf26), and mitochondrial respiration (TMEM242). In addition to assigning gene function, single-cell transcriptional phenotypes allow for in-depth dissection of complex cellular phenomena-from RNA processing to differentiation. We leverage this ability to systematically identify genetic drivers and consequences of aneuploidy and to discover an unanticipated layer of stress-specific regulation of the mitochondrial genome. Our information-rich genotype-phenotype map reveals a multidimensional portrait of gene and cellular function.",
+    "kind_hint": "publication",
+    "landing_url": "https://doi.org/10.1016/j.cell.2022.05.013",
+    "license_hint": "Publisher page; EuropePMC public metadata only (PMID 35688146)",
+    "source_urls": [
+      "https://doi.org/10.1016/j.cell.2022.05.013",
+      "https://europepmc.org/article/MED/35688146"
+    ],
+    "keywords": [
+      "perturb-seq",
+      "genome-scale Perturb-seq",
+      "CRISPRi",
+      "Replogle"
+    ],
+    "download": "forbidden"
+  },
+  "https://zenodo.org/records/7058381": {
+    "title": "scPerturb Single-Cell Perturbation Data: ATAC files",
+    "summary": "scPerturb Single-Cell Perturbation Data: ATAC files. Public Zenodo landing (concept record 7058381; live version resolved to 7058382 on 2026-08-28). h5ad/ATAC payloads are not downloaded.",
+    "kind_hint": "dataset",
+    "landing_url": "https://zenodo.org/records/7058381",
+    "license_hint": "See Zenodo record; ATAC files not downloaded",
+    "source_urls": [
+      "https://zenodo.org/records/7058381",
+      "https://zenodo.org/records/7058382",
+      "https://scperturb.org/"
+    ],
+    "keywords": [
+      "scperturb",
+      "scPerturb",
+      "perturbation",
+      "single-cell",
+      "ATAC"
+    ],
+    "download": "forbidden"
+  },
+  "https://zenodo.org/records/7041848": {
+    "title": "scPerturb Single-Cell Perturbation Data: RNA and protein h5ad files",
+    "summary": "Collection of h5ad files for RNA and protein single-cell perturbation datasets on scPerturb.org. Public Zenodo concept landing 7041848 (live API resolved to version 13350497 on 2026-08-28). h5ad payloads are not downloaded.",
+    "kind_hint": "dataset",
+    "landing_url": "https://zenodo.org/records/7041848",
+    "license_hint": "See Zenodo record; h5ad not downloaded",
+    "source_urls": [
+      "https://zenodo.org/records/7041848",
+      "https://zenodo.org/records/13350497",
+      "https://scperturb.org/"
+    ],
+    "keywords": [
+      "virtual cell",
+      "scperturb",
+      "scPerturb",
+      "perturbation",
+      "single-cell"
+    ],
+    "download": "forbidden"
+  },
+  "gs://arc-institute-virtual-cell-atlas/virtual-cell-challenge/": {
+    "title": "Arc Institute Virtual Cell Challenge perturbation expression set (object-store pointer)",
+    "summary": "Public GCS prefix for Arc Virtual Cell Challenge single-cell perturbation expression data. Recorded as a landing URI only. This atlas never lists, streams, or downloads objects from the bucket. GitHub tree virtual-cell-challenge/2025 is 404; do not use that path as a landing.",
+    "kind_hint": "dataset",
+    "landing_url": "https://github.com/ArcInstitute/arc-virtual-cell-atlas/blob/main/virtual-cell-challenge/README.md",
+    "license_hint": "CC0 1.0 (as stated on Arc public pages; verify before reuse)",
+    "source_urls": [
+      "https://github.com/ArcInstitute/arc-virtual-cell-atlas",
+      "https://arcinstitute.org/tools/virtualcellatlas"
+    ],
+    "keywords": [
+      "virtual cell",
+      "virtual cell challenge",
+      "single-cell",
+      "perturbation",
+      "hESC"
+    ],
+    "download": "forbidden"
+  },
+  "https://github.com/ArcInstitute/state": {
+    "title": "ArcInstitute/state",
+    "summary": "State is a machine learning model that predicts cellular perturbation response across diverse contexts. Public GitHub repository metadata only; weights and training matrices are not downloaded. Live Europe PMC record for the State preprint: 10.1101/2025.06.26.661135 (DOI:10.1101/2025.06.26.661135v2 was empty in Europe PMC this harvest).",
+    "kind_hint": "software",
+    "landing_url": "https://github.com/ArcInstitute/state",
+    "license_hint": "NOASSERTION",
+    "source_urls": [
+      "https://github.com/ArcInstitute/state",
+      "https://huggingface.co/arcinstitute/SE-600M"
+    ],
+    "keywords": [
+      "virtual cell",
+      "State",
+      "perturbation",
+      "software"
+    ],
+    "doi": "10.1101/2025.06.26.661135",
+    "download": "forbidden"
+  },
+  "https://huggingface.co/arcinstitute/SE-600M": {
+    "title": "arcinstitute/SE-600M",
+    "summary": "Arc Institute State encoder SE-600M public Hugging Face model card. Model weights are not downloaded. Attached live Europe PMC preprint 10.1101/2025.06.26.661135 (Predicting cellular responses to perturbation across diverse contexts with State).",
+    "kind_hint": "model",
+    "landing_url": "https://huggingface.co/arcinstitute/SE-600M",
+    "license_hint": "Hugging Face public model card; weights not downloaded",
+    "source_urls": [
+      "https://huggingface.co/arcinstitute/SE-600M",
+      "https://github.com/ArcInstitute/state"
+    ],
+    "keywords": [
+      "virtual cell",
+      "State",
+      "SE-600M",
+      "model"
+    ],
+    "doi": "10.1101/2025.06.26.661135",
+    "download": "forbidden"
+  },
+  "https://huggingface.co/datasets/RainGate/MAP-KG": {
+    "title": "RainGate/MAP-KG",
+    "summary": "This is the official data repository for \"MAP: A Knowledge-driven Framework for Predicting Single-cell Responses for Unprofiled Drugs\". We will release MAP-KG data soon. Public Hugging Face dataset card only; matrices are not downloaded. Related paper DOI 10.1038/s42256-026-01286-w (live Crossref + doi.org landing).",
+    "kind_hint": "dataset",
+    "landing_url": "https://huggingface.co/datasets/RainGate/MAP-KG",
+    "license_hint": "apache-2.0",
+    "source_urls": [
+      "https://huggingface.co/datasets/RainGate/MAP-KG",
+      "https://doi.org/10.1038/s42256-026-01286-w"
+    ],
+    "keywords": [
+      "virtual cell",
+      "MAP",
+      "MAP-KG",
+      "perturbation",
+      "single-cell"
+    ],
+    "download": "forbidden"
+  },
+  "https://pertpy.readthedocs.io/en/latest/": {
+    "title": "pertpy — Perturbation Analysis in Python",
+    "summary": "pertpy documentation landing (live title: pertpy - Perturbation Analysis in Python). Docs print Nature Methods paper 10.1038/s41592-025-02909-7. Software/method pointer; no matrices downloaded.",
+    "kind_hint": "software",
+    "landing_url": "https://pertpy.readthedocs.io/en/latest/",
+    "license_hint": "Documentation landing; see repository LICENSE",
+    "source_urls": [
+      "https://pertpy.readthedocs.io/en/latest/",
+      "https://github.com/scverse/pertpy",
+      "https://doi.org/10.1038/s41592-025-02909-7"
+    ],
+    "keywords": [
+      "virtual cell",
+      "pertpy",
+      "perturbation",
+      "software",
+      "method"
+    ],
+    "download": "forbidden"
+  },
+  "https://zenodo.org/records/14518762": {
+    "title": "Systematic reconstruction of molecular pathway signatures using scalable single-cell perturbation screens",
+    "summary": "This repo contains Seurat objects, differential expression analysis results, and pathway gene lists for the manuscript \"Systematic reconstruction of molecular pathway signatures using scalable single-cell perturbation screens\" List of files: 1. Seurat_object_IFNB_Perturb_seq.rds: Seurat object of the Perturb-seq data for Interferon-beta pathway 2. Seurat_object_IFNG_Perturb_seq.rds: Seurat object of the Perturb-seq data for Interferon-gamma pathway 3. Seurat_object_TNFA_Perturb_seq.rds: Seurat object of the Perturb-seq data for TNF-alpha pathway 4. Seurat_object_TGFB1_Perturb_seq.rds: Seurat object of the Perturb-seq data for TGF-beta1 pathway 5. Seurat_object_INS_Perturb_seq.rds: Seurat object of the Perturb-seq data for insulin pathway 6. Pathway_genelist.rds: The pathway gene lists from MultiCCA analysis 7. Pathway_Exclusive_genelist.rds: The pathway exclusive gene lists generated from Pathway_genelist.rds 8. HClust_Pathway_celltype_specific_genelist.rds: The cell-line specific pathway gene lists from hierarchical clustering analysis independently done on each cell line 9. DE_results_all_pathway.zip: The DE test results for all the regulators, cell lines, and pathways (from Mixs Public Zenodo landing only; payloads are not downloaded. DOI 10.5281/zenodo.14518762 (Jiang Perturb-seq).",
+    "kind_hint": "dataset",
+    "landing_url": "https://zenodo.org/records/14518762",
+    "license_hint": "cc-by-4.0",
+    "source_urls": [
+      "https://zenodo.org/records/14518762",
+      "https://doi.org/10.5281/zenodo.14518762"
+    ],
+    "keywords": [
+      "virtual cell",
+      "perturb-seq",
+      "Jiang",
+      "single-cell"
+    ],
+    "doi": "10.5281/zenodo.14518762",
+    "download": "forbidden"
+  },
+  "https://www.cancerimagingarchive.net/collection/cptac-luad/": {
+    "title": "CPTAC-LUAD - The Cancer Imaging Archive (TCIA)",
+    "summary": "TCIA collection landing for CPTAC-LUAD (live page title). Pointer only — DICOM / pixel data are never downloaded. Collection name CPTAC-LUAD is already in the TCIA names catalog.",
+    "kind_hint": "dataset",
+    "landing_url": "https://www.cancerimagingarchive.net/collection/cptac-luad/",
+    "license_hint": "TCIA collection landing; images not fetched",
+    "source_urls": [
+      "https://www.cancerimagingarchive.net/collection/cptac-luad/"
+    ],
+    "keywords": [
+      "CPTAC-LUAD",
+      "TCIA",
+      "lung adenocarcinoma",
+      "imaging"
+    ],
+    "download": "forbidden"
+  },
+  "https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-6149": {
+    "title": "Single cell sequencing of lung carcinoma",
+    "summary": "ArrayExpress / BioStudies accession E-MTAB-6149. Live BioStudies title: Single cell sequencing of lung carcinoma. ReleaseDate 2018-07-09. URL pointer only — not a GEO accession. Matrices not downloaded.",
+    "kind_hint": "dataset",
+    "landing_url": "https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-6149",
+    "license_hint": "BioStudies / ArrayExpress public study metadata; matrices not downloaded",
+    "source_urls": [
+      "https://www.ebi.ac.uk/biostudies/arrayexpress/studies/E-MTAB-6149"
+    ],
+    "keywords": [
+      "E-MTAB-6149",
+      "ArrayExpress",
+      "BioStudies",
+      "lung carcinoma",
+      "single-cell"
+    ],
+    "download": "forbidden"
+  },
+  "https://gdc.cancer.gov/about-data/publications/CPTAC-3_2020_3": {
+    "title": "Proteogenomic Characterization Reveals Therapeutic Vulnerabilities in Lung Adenocarcinoma | NCI Genomic Data Commons",
+    "summary": "GDC publications landing for CPTAC-3 LUAD (CPTAC-3_2020_3). Live page title observed. Publication pointer only; GDC /data and BAM are forbidden.",
+    "kind_hint": "publication",
+    "landing_url": "https://gdc.cancer.gov/about-data/publications/CPTAC-3_2020_3",
+    "license_hint": "GDC publication landing; controlled files not fetched",
+    "source_urls": [
+      "https://gdc.cancer.gov/about-data/publications/CPTAC-3_2020_3"
+    ],
+    "keywords": [
+      "CPTAC-3",
+      "LUAD",
+      "lung adenocarcinoma",
+      "publication"
+    ],
+    "download": "forbidden"
+  },
+  "https://doi.org/10.1038/s42256-026-01286-w": {
+    "title": "A knowledge-driven framework for predicting single-cell responses for unprofiled drugs | Nature Machine Intelligence",
+    "summary": "MAP paper. Live doi.org title and Crossref work 10.1038/s42256-026-01286-w (published 2026-08-26). Europe PMC was empty this harvest. Publication pointer; full text not downloaded.",
+    "kind_hint": "publication",
+    "landing_url": "https://doi.org/10.1038/s42256-026-01286-w",
+    "license_hint": "Publisher landing; closed full text not downloaded",
+    "source_urls": [
+      "https://doi.org/10.1038/s42256-026-01286-w",
+      "https://huggingface.co/datasets/RainGate/MAP-KG"
+    ],
+    "keywords": [
+      "MAP",
+      "virtual cell",
+      "single-cell",
+      "publication"
+    ],
+    "doi": "10.1038/s42256-026-01286-w",
+    "download": "forbidden"
+  },
+  "https://doi.org/10.1038/s41514-026-00470-x": {
+    "title": "Aging-related transcriptomic signatures associated with recurrence following resection of stage I lung adenocarcinoma | npj Aging",
+    "summary": "npj Aging LUAD paper. Live doi.org title and Crossref work 10.1038/s41514-026-00470-x (published 2026-08-28). Europe PMC was empty this harvest. Publication pointer only; no GSE on this record.",
+    "kind_hint": "publication",
+    "landing_url": "https://doi.org/10.1038/s41514-026-00470-x",
+    "license_hint": "Publisher landing; closed full text not downloaded",
+    "source_urls": [
+      "https://doi.org/10.1038/s41514-026-00470-x"
+    ],
+    "keywords": [
+      "LUAD",
+      "lung adenocarcinoma",
+      "aging",
+      "publication"
+    ],
+    "doi": "10.1038/s41514-026-00470-x",
+    "download": "forbidden"
+  },
+  "https://doi.org/10.1101/2025.02.20.639398": {
+    "title": "Tahoe-100M: A Giga-Scale Single-Cell Perturbation Atlas for Context-Dependent Gene Function and Cellular Modeling",
+    "summary": "Tahoe-100M preprint. Live Europe PMC DOI 10.1101/2025.02.20.639398 (PPR982096). Publication pointer; Hugging Face dataset card is a separate node. Matrices not downloaded.",
+    "kind_hint": "publication",
+    "landing_url": "https://doi.org/10.1101/2025.02.20.639398",
+    "license_hint": "bioRxiv preprint metadata; full text not required",
+    "source_urls": [
+      "https://doi.org/10.1101/2025.02.20.639398",
+      "https://huggingface.co/datasets/tahoebio/Tahoe-100M"
+    ],
+    "keywords": [
+      "virtual cell",
+      "Tahoe-100M",
+      "preprint"
+    ],
+    "doi": "10.1101/2025.02.20.639398",
+    "download": "forbidden"
+  },
+  "https://doi.org/10.1101/2025.06.26.661135": {
+    "title": "Predicting cellular responses to perturbation across diverse contexts with State",
+    "summary": "State preprint. Live Europe PMC DOI 10.1101/2025.06.26.661135 (PPR1043725). Attached to ArcInstitute/state software and arcinstitute/SE-600M model. Europe PMC query for 10.1101/2025.06.26.661135v2 was empty this harvest.",
+    "kind_hint": "publication",
+    "landing_url": "https://doi.org/10.1101/2025.06.26.661135",
+    "license_hint": "bioRxiv preprint metadata",
+    "source_urls": [
+      "https://doi.org/10.1101/2025.06.26.661135",
+      "https://github.com/ArcInstitute/state",
+      "https://huggingface.co/arcinstitute/SE-600M"
+    ],
+    "keywords": [
+      "virtual cell",
+      "State",
+      "preprint"
+    ],
+    "doi": "10.1101/2025.06.26.661135",
+    "download": "forbidden"
+  }
+}

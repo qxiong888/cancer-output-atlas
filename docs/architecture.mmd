@@ -1,0 +1,13 @@
+%% Cancer Output Atlas — public architecture
+%% Find ranks a baked public-metadata graph. No live ingest. No invented IDs.
+
+flowchart LR
+  U["User goal"] --> A["Agent tools"]
+  A --> P["parse_goal"]
+  A --> R["retrieve baked graph"]
+  A --> X["refuse / abstain"]
+  P --> G["link_graph.json<br/>public metadata only"]
+  R --> G
+  G --> H{hits?}
+  H -->|yes| O["ODS groups<br/>data · software · tool<br/>method · model · trial · biospecimen"]
+  H -->|no| X

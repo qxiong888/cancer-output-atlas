@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cancer-output-atlas"
+version = "0.1.0"
+description = "Classify and link public cancer research outputs so they are findable and reusable."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Qing Xiong" }]
+requires-python = ">=3.10"
+dependencies = [
+  "strands-agents>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "openpyxl>=3.1"]
+
+[project.scripts]
+coa = "cancer_output_atlas.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

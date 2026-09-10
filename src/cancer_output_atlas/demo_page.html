@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cancer Output Atlas</title>
+<style>
+  :root {
+    color: #1f2328;
+    background: #f6f7f8;
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+      Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { max-width: 44rem; margin: 5vh auto 4rem; padding: 0 1.25rem; }
+  h1 { font-size: 1.15rem; font-weight: 650; margin: 0 0 0.4rem; letter-spacing: 0.01em; }
+  .lead { margin: 0 0 1.1rem; color: #4b5563; font-size: 0.98rem; }
+  textarea {
+    display: block; width: 100%; min-height: 4.6rem; font: inherit;
+    padding: 0.75rem 0.9rem; border: 1px solid #d0d7de; border-radius: 10px;
+    resize: vertical; background: #fff; color: #1f2328;
+  }
+  textarea:focus { outline: none; border-color: #8c959f; box-shadow: 0 0 0 3px #e7ebef; }
+  button.primary {
+    margin-top: 0.65rem; font: inherit; font-size: 0.92rem; font-weight: 600;
+    padding: 0.45rem 1.1rem; border: 0; border-radius: 8px;
+    background: #24292f; color: #fff; cursor: pointer;
+  }
+  button.primary:disabled { opacity: 0.45; cursor: wait; }
+  .fine { margin-top: 0.7rem; font-size: 0.75rem; color: #8b949e; }
+  #results { margin-top: 1.6rem; }
+  .summary { margin: 0 0 0.75rem; font-size: 0.88rem; color: #57606a; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 1.1rem; }
+  .chip {
+    appearance: none; border: 1px solid #d0d7de; background: #fff; color: #24292f;
+    border-radius: 999px; padding: 0.22rem 0.7rem; font: inherit; font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .chip:hover { background: #f3f4f6; }
+  .chip[aria-pressed="true"] { background: #24292f; color: #fff; border-color: #24292f; }
+  .chip[disabled] { opacity: 0.38; cursor: default; }
+  .chip .n { color: inherit; opacity: 0.72; margin-left: 0.2rem; font-variant-numeric: tabular-nums; }
+  section.ods {
+    background: #fff; border: 1px solid #d8dee4; border-radius: 12px;
+    padding: 0.9rem 1rem 0.75rem; margin: 0 0 0.85rem;
+  }
+  section.ods[hidden] { display: none; }
+  section.ods h2 {
+    font-size: 0.92rem; font-weight: 650; margin: 0 0 0.65rem;
+    display: flex; align-items: baseline; gap: 0.45rem;
+  }
+  section.ods h2 .n { font-weight: 500; color: #656d76; font-size: 0.8rem; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li.hit {
+    padding: 0.65rem 0;
+    border-top: 1px solid #eef1f4;
+  }
+  li.hit:first-child { border-top: 0; padding-top: 0; }
+  .title { color: #0969da; text-decoration: none; font-weight: 550; }
+  .title:hover { text-decoration: underline; }
+  .why { display: block; font-size: 0.84rem; color: #57606a; margin-top: 0.18rem; }
+  .blurb {
+    display: block; font-size: 0.86rem; color: #3d444d; margin-top: 0.2rem;
+    line-height: 1.4; max-height: 2.8em; overflow: hidden;
+  }
+  .meta { display: block; font-size: 0.75rem; color: #8b949e; margin-top: 0.12rem; }
+  .more {
+    appearance: none; border: 0; background: none; color: #0969da;
+    font: inherit; font-size: 0.82rem; padding: 0.35rem 0 0.15rem; cursor: pointer;
+  }
+  .note { margin: 0; font-size: 0.88rem; color: #57606a; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cancer Output Atlas</h1>
+  <p class="lead">Say what you want to do. Find public cancer resources you can reuse.</p>
+  <form id="f" action="#" method="get">
+    <textarea id="goal" name="goal" placeholder="Find public NSCLC + pembrolizumab data and trials I can reuse"></textarea>
+    <button class="primary" type="submit" id="go">Find resources</button>
+  </form>
+  <p class="fine">Public metadata only. Controlled data is a pointer, not a download.</p>
+  <div id="results"></div>
+</main>
+<script type="application/json" id="fallback-a">__FALLBACK_A__</script>
+<script>
+(function () {
+  var ODS = [
+    ["data", "Data"],
+    ["software", "Software"],
+    ["tool", "Tools"],
+    ["method", "Methods"],
+    ["model", "Models"],
+    ["trial_result", "Trial results"],
+    ["biospecimen", "Biospecimens"]
+  ];
+  var STOP = {
+    find:1, public:1, resources:1, resource:1, related:1, dataset:1, datasets:1,
+    i:1, can:1, the:1, a:1, an:1, of:1, and:1, or:1, to:1, for:1, with:1, in:1, on:1,
+    reuse:1, use:1, used:1, using:1
+  };
+  var DEFAULT_GOAL = "Find public NSCLC pembrolizumab / Keytruda immunotherapy resources I can reuse";
+  var PREVIEW = 8;
+  var ABSTAIN_EN = "No public entries on this graph match that goal.";
+  var goalBox = document.getElementById("goal");
+  var form = document.getElementById("f");
+  var btn = document.getElementById("go");
+  var box = document.getElementById("results");
+  var activeSlug = "all";
+  var lastPayload = null;
+  goalBox.value = DEFAULT_GOAL;
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function hasCjk(s) { return /[\u3400-\u9fff]/.test(String(s || "")); }
+  function englishWhy(r) {
+    var raw = r.why_short || r.why || "";
+    if (raw && !hasCjk(raw) && raw.indexOf("profile_fit=") !== 0 && raw.indexOf("goal-token overlap") === -1) {
+      return raw;
+    }
+    var overlap = [];
+    var src = r.goal_overlap || [];
+    for (var i = 0; i < src.length && overlap.length < 4; i++) {
+      var t = String(src[i] || "");
+      if (t && !STOP[t.toLowerCase()] && !hasCjk(t)) overlap.push(t);
+    }
+    if (overlap.length) return "Matches " + overlap.join(" ");
+    return "";
+  }
+  function fallbackA() {
+    try { return JSON.parse(document.getElementById("fallback-a").textContent); }
+    catch (e) { return null; }
+  }
+  function sameGoal(a, b) { return String(a || "").trim() === String(b || "").trim(); }
+
+  function hitHtml(r) {
+    var u = r.landing_url || "";
+    var tt = r.title || r.output_id || "";
+    var th = u
+      ? "<a class=\"title\" href=\"" + esc(u) + "\" target=\"_blank\" rel=\"noopener\">" + esc(tt) + "</a>"
+      : "<span class=\"title\">" + esc(tt) + "</span>";
+    var why = englishWhy(r);
+    var blurb = String(r.summary || "").trim();
+    if (hasCjk(blurb)) blurb = "";
+    var st = r.trial_status_label || "";
+    return "<li class=\"hit\">" + th
+      + (st ? "<span class=\"why\">" + esc(st) + "</span>" : "")
+      + (why ? "<span class=\"why\">" + esc(why) + "</span>" : "")
+      + (blurb ? "<span class=\"blurb\">" + esc(blurb) + "</span>" : "")
+      + "</li>";
+  }
+
+  function render(payload) {
+    lastPayload = payload || {};
+    var by = lastPayload.by_ods || {};
+    var totals = lastPayload.matched_by_ods || {};
+    var matched = lastPayload.matched_total != null ? lastPayload.matched_total : 0;
+    if (!matched) {
+      for (var z in by) { if (by[z] && by[z].length) matched += by[z].length; }
+    }
+    var html = "";
+    if (!matched) {
+      var abstain = lastPayload.abstain;
+      html = "<p class=\"note\">" + esc((abstain && !hasCjk(abstain)) ? abstain : ABSTAIN_EN) + "</p>";
+      box.innerHTML = html;
+      return;
+    }
+    html += "<p class=\"summary\">" + matched + " matches, grouped by type.</p>";
+    html += "<div class=\"chips\" role=\"tablist\" aria-label=\"Resource type\">";
+    html += "<button type=\"button\" class=\"chip\" data-ods=\"all\" aria-pressed=\"" + (activeSlug === "all" ? "true" : "false") + "\">All<span class=\"n\">" + matched + "</span></button>";
+    for (var k = 0; k < ODS.length; k++) {
+      var slug = ODS[k][0], label = ODS[k][1];
+      var n = totals[slug] != null ? totals[slug] : ((by[slug] || []).length);
+      if (!n) {
+        html += "<button type=\"button\" class=\"chip\" disabled>" + label + "<span class=\"n\">0</span></button>";
+        continue;
+      }
+      html += "<button type=\"button\" class=\"chip\" data-ods=\"" + slug + "\" aria-pressed=\"" + (activeSlug === slug ? "true" : "false") + "\">" + label + "<span class=\"n\">" + n + "</span></button>";
+    }
+    html += "</div>";
+    for (var i = 0; i < ODS.length; i++) {
+      var s = ODS[i][0], lab = ODS[i][1];
+      var hits = by[s] || [];
+      if (!hits.length) continue;
+      var hide = activeSlug !== "all" && activeSlug !== s;
+      var totalKind = totals[s] != null ? totals[s] : hits.length;
+      html += "<section class=\"ods\" data-section=\"" + s + "\"" + (hide ? " hidden" : "") + ">";
+      html += "<h2>" + lab + "<span class=\"n\">" + totalKind + "</span></h2><ul>";
+      var shown = hits.slice(0, PREVIEW);
+      for (var j = 0; j < shown.length; j++) html += hitHtml(shown[j]);
+      html += "</ul>";
+      if (hits.length > PREVIEW) {
+        html += "<button type=\"button\" class=\"more\" data-expand=\"" + s + "\">Show more</button>";
+      } else if (totalKind > hits.length) {
+        html += "<p class=\"meta\">" + totalKind + " in this type; showing " + hits.length + "</p>";
+      }
+      html += "</section>";
+    }
+    box.innerHTML = html;
+  }
+
+  function expand(slug) {
+    if (!lastPayload) return;
+    var by = lastPayload.by_ods || {};
+    var hits = by[slug] || [];
+    var sec = box.querySelector("section[data-section=\"" + slug + "\"]");
+    if (!sec) return;
+    var ul = sec.querySelector("ul");
+    var html = "";
+    for (var j = 0; j < hits.length; j++) html += hitHtml(hits[j]);
+    ul.innerHTML = html;
+    var more = sec.querySelector(".more");
+    if (more) more.remove();
+  }
+
+  box.addEventListener("click", function (ev) {
+    var chip = ev.target.closest("[data-ods]");
+    if (chip && !chip.disabled) {
+      activeSlug = chip.getAttribute("data-ods") || "all";
+      render(lastPayload);
+      return;
+    }
+    var more = ev.target.closest("[data-expand]");
+    if (more) expand(more.getAttribute("data-expand"));
+  });
+
+  var reqGen = 0;
+  function showLoading() {
+    box.innerHTML = "<p class=\"note\">Looking up public resources…</p>";
+  }
+  function showUnavailable() {
+    var ts = new Date().toISOString();
+    box.innerHTML = "<p class=\"note\">Lookup unavailable · " + esc(ts) + "</p>";
+  }
+
+  async function lookup(goal) {
+    var gen = ++reqGen;
+    btn.disabled = true;
+    activeSlug = "all";
+    lastPayload = null;
+    showLoading();
+    var q = String(goal || "").trim();
+    if (!q) {
+      if (gen !== reqGen) return;
+      render({
+        goal: "",
+        matched_total: 0,
+        by_ods: {},
+        abstain: ABSTAIN_EN,
+        generated_at_utc: new Date().toISOString()
+      });
+      return;
+    }
+    try {
+      var res = await fetch("/api/find?goal=" + encodeURIComponent(q) + "&top=40");
+      if (gen !== reqGen) return;
+      if (res.ok) { render(await res.json()); return; }
+      showUnavailable();
+    } catch (e) {
+      if (gen !== reqGen) return;
+      showUnavailable();
+    }
+  }
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    lookup(goalBox.value).finally(function () { btn.disabled = false; });
+  });
+  goalBox.addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); form.requestSubmit(); }
+  });
+  showLoading();
+  lookup(goalBox.value).finally(function () { btn.disabled = false; });
+})();
+</script>
+</body>
+</html>
