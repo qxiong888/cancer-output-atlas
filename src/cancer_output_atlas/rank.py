@@ -197,6 +197,8 @@ WEAK_ALONE = frozenset(
         "asthma",
         "alzheimer",
         "metformin",
+        "etc",
+        "passwd",
     }
 )
 

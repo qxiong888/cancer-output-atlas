@@ -31,6 +31,11 @@ _CLINICAL_RE = re.compile(
     r"prescrib(?:e|ing|ed)|"
     r"treatment\s+plan|"
     r"care\s+plan|"
+    r"best\s+treatment|"
+    r"treatment\s+for\s+my|"
+    r"right\s+for\s+my|"
+    r"what\s+to\s+take|"
+    r"tell\s+me\s+what\s+to\s+take|"
     r"my\s+patient|"
     r"the\s+patient|"
     r"start\s+tomorrow|"
@@ -42,6 +47,9 @@ _CLINICAL_RE = re.compile(
     r"medical\s+advice"
     r")\b"
 )
+
+# Injection / path probes (not catalog goals).
+_PATH_PROBE_RE = re.compile(r"(?i)(/etc/|\betc/passwd\b|\bpasswd\b)")
 
 # Strong cancer-domain signals (not exhaustive; prefer abstain if missing + non-cancer disease).
 _CANCER_RE = re.compile(
@@ -90,6 +98,11 @@ WEAK_SOLO = frozenset(
         "resources",
         "related",
         "find",
+        "etc",
+        "passwd",
+        "please",
+        "hart",
+        "canary",
     }
 )
 
@@ -128,6 +141,11 @@ def _tokens(text: str) -> list[str]:
     return [t for t in _norm(text).split(" ") if t]
 
 
+
+def path_probe(goal: str) -> bool:
+    return bool(_PATH_PROBE_RE.search(goal or ""))
+
+
 def clinical_intent(goal: str) -> bool:
     return bool(_CLINICAL_RE.search(goal or ""))
 
@@ -162,6 +180,8 @@ def evaluate_goal_boundary(goal: str) -> BoundaryDecision:
         return BoundaryDecision(True, "empty_goal", WEAK_TOKEN_ABSTAIN, "empty")
     if clinical_intent(g):
         return BoundaryDecision(True, "clinical_intent", CLINICAL_ABSTAIN, "clinical")
+    if path_probe(g) and not has_cancer_signal(g):
+        return BoundaryDecision(True, "path_probe", WEAK_TOKEN_ABSTAIN, "weak")
     if noncancer_disease(g) and not has_cancer_signal(g):
         return BoundaryDecision(True, "noncancer_domain", OUT_OF_DOMAIN_ABSTAIN, "noncancer")
     if weak_only_goal(g):
