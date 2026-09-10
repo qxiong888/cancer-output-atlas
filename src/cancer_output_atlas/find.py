@@ -23,6 +23,7 @@ from cancer_output_atlas.ods import (
     trial_status_label,
 )
 from cancer_output_atlas.pipeline import records_from_json
+from cancer_output_atlas.boundary import evaluate_goal_boundary
 from cancer_output_atlas.rank import parse_goal, rank_records
 from cancer_output_atlas.schema import OutputRecord, classification_row
 
@@ -328,6 +329,15 @@ def find_by_goal(
     goal = (goal or "").strip()
     if not goal:
         return _empty_find_payload("", top=top, graph_path=graph_path)
+    gate = evaluate_goal_boundary(goal)
+    if gate.abstain:
+        payload = _empty_find_payload(goal, top=top, graph_path=graph_path)
+        ts = payload["generated_at_utc"]
+        payload["abstain"] = f"{gate.message} Snapshot {ts}."
+        payload["parser"] = f"boundary:{gate.gate}"
+        payload["boundary_gate"] = gate.gate
+        payload["boundary_reason"] = gate.reason
+        return payload
     records = merge_catalog_pointers(records)
     query = parse_goal(goal)
     ranked = rank_records(records, goal=goal, top=None, query_first=True, query=query)

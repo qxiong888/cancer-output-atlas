@@ -185,6 +185,18 @@ WEAK_ALONE = frozenset(
         "null",
         "none",
         "hart",  # Hart canary org crumb in fake DOIs
+        "bound",
+        "open",
+        "non",
+        "rate",
+        "car",
+        "rna",
+        "clinical",
+        "arthritis",
+        "diabetes",
+        "asthma",
+        "alzheimer",
+        "metformin",
     }
 )
 
