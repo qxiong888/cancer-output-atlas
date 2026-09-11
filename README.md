@@ -2,9 +2,7 @@
 
 **Apache-2.0** · [Agents for Humans](https://agentsforhumans.devpost.com/) · Professional Agents
 
-**Cancer Output Atlas** is an agent-managed living graph of public cancer research outputs, updated daily. A researcher types a reuse goal; the agent returns outputs they can actually open — datasets, software, workflows, models, trial records, and biospecimen pointers — grouped by output-type labels aligned with the NCI ODS Impact Prize definition of a [cancer research output](https://www.nih.gov/challenges/nci-office-data-sharing-impact-prize) (data, software, tools, methods/protocols, models, clinical trial results, biospecimens). Not an NCI product or endorsement.
-
-It does **not** invent GEO, NCT, DOI, or other accessions. If the current graph snapshot has no match, it **abstains**.
+**Cancer Output Atlas** is an agent-managed living graph of public cancer research outputs, updated daily. A researcher types a reuse goal; the agent returns outputs they can actually open — datasets, software, workflows, models, trial records, and biospecimen pointers — grouped by output-type labels aligned with the NCI ODS Impact Prize definition of a [cancer research output](https://www.nih.gov/challenges/nci-office-data-sharing-impact-prize) (data, software, tools, methods/protocols, models, clinical trial results, biospecimens).
 
 **Live demo:** https://cancer-output-atlas-ulao4pneza-uc.a.run.app
 
@@ -14,17 +12,17 @@ The **3 September 2026** snapshot in this repo shows **9,935** public resource r
 
 ## What it does
 
-Cancer researchers already know the portals (GEO, ClinicalTrials.gov, cBioPortal, Dockstore, GDC, …). What they do not have is a single, honest answer to *“what public outputs can I reuse for this goal?”* Search engines return papers. Portals return catalogs. Neither one says “nothing here” when the graph is empty.
+Regular **standard web search** is useful for broad discovery, but results can mix datasets, publications, and other content, leaving you to sort and inspect the sources. **Large language models** can explain concepts and suggest resources. Without external retrieval, however, plausible citations or resource identifiers may be incorrect, and model knowledge alone cannot keep pace with newly released resources. Researchers need an evolving catalog with clear resource types and traceable sources.
 
-Cancer Output Atlas:
+Cancer Output Atlas addresses that need through a maintained graph of research records:
 
-1. Takes a free-text goal (English or Chinese).
+1. Takes a free-text reuse goal (English or Chinese).
 2. Parses it into topic / type slots (`parse_goal`).
-3. Retrieves **only** nodes that already exist on the current public-metadata graph snapshot.
-4. Groups hits by ODS type (data, software, tool, method, model, trial result, biospecimen).
-5. **Abstains** when nothing relevant is on the graph — it never fabricates an ID to fill the page.
+3. On live Cloud Run, constructs an official **Strands** `Agent` that must call `find_public_outputs` against the current graph snapshot.
+4. Returns stored resource identifiers and source links, grouped by ODS type (data, software, tool, method, model, trial result, biospecimen).
+5. Agents harvest allow-listed public metadata offline and refresh the graph **daily**, so coverage grows over time.
 
-The catalog is **living**: agents harvest allow-listed public metadata APIs offline and refresh the graph **daily**, so coverage grows over time. Each find request ranks the **current baked snapshot** (`out/link_graph.json`) — it does not re-ingest from GEO or other APIs on click, and it does not download omics. Controlled resources (dbGaP, HTAN sequencing, GDC BAM, COSMIC tables) appear only as apply-yourself pointers.
+This comparison covers standard web search and language models used without external retrieval. Honesty rules are collected in [Safety](#safety).
 
 ## Who it is for
 
@@ -34,19 +32,19 @@ Typical goals the live demo is built for:
 
 - NSCLC pembrolizumab / Keytruda immunotherapy resources (the live default goal)
 - breast cancer RNA-seq public data
-- a nonsense or empty goal, which must abstain
+- an unrelated goal, which must abstain
 
 ---
 
 ## Architecture
 
-Daily harvest keeps the living graph current. User goal → agent tools → current baked snapshot → ODS groups or abstain. No on-click ingest. No claim graph.
+Daily harvest keeps the living graph current. User goal → Strands agent tools → current baked snapshot → ODS groups or abstain.
 
 ![Architecture](docs/architecture.svg)
 
 ```mermaid
 flowchart LR
-  U["User goal"] --> A["Find on baked graph"]
+  U["User goal"] --> A["Strands Agent<br/>find_public_outputs"]
   A --> P["parse_goal"]
   A --> R["retrieve only existing nodes"]
   A --> X["abstain if empty"]
@@ -57,13 +55,11 @@ flowchart LR
   H -->|no| X
 ```
 
-The find path ranks the **current** baked `out/link_graph.json` (the daily-refreshed living catalog). It does not call GEO or any other API at query time, and it does not download omics. New resources enter the catalog through the offline daily harvest, not through the request path.
-
-A second diagram of how the official SDK is wired:
+The find path ranks the **current** baked `out/link_graph.json` (the daily-refreshed living catalog). New resources enter the catalog through the offline daily harvest, not through the request path.
 
 ```mermaid
 flowchart TB
-  subgraph live ["Live demo today — Cloud Run / serve.py"]
+  subgraph live ["Live demo — Cloud Run / serve.py"]
     S["GET /api/find?goal=…"] --> AG["build_find_agent<br/>strands.Agent + find_public_outputs"]
     AG --> F["find_by_goal on baked graph"]
     F --> PG["rank.parse_goal"]
@@ -86,16 +82,16 @@ flowchart TB
 
 ## How judges see Strands
 
-Judges score **thorough use of the official Strands Agents SDK**. This repo uses the real package (`strands-agents` in `pyproject.toml`), not a stub.
+Agents for Humans scores **thorough use of the official Strands Agents SDK**. This submission uses the real package (`strands-agents` in `pyproject.toml`), not a stub. The live demo path constructs `strands.Agent` on each find.
 
 | File | What it is |
 |------|------------|
-| [`src/cancer_output_atlas/runtime.py`](src/cancer_output_atlas/runtime.py) | **Only** module that imports Strands. `from strands import Agent, tool`. `build_agent()` constructs an official `strands.Agent`. If the import fails, `@tool` degrades to a passthrough so offline tests still run — that fallback is **not** a Strands API. |
+| [`src/cancer_output_atlas/runtime.py`](src/cancer_output_atlas/runtime.py) | **Only** module that imports Strands. `from strands import Agent, tool`. `build_agent()` / `build_find_agent()` construct an official `strands.Agent`. If the import fails, `@tool` degrades to a passthrough so offline tests still run — that fallback is **not** a Strands API. |
 | [`src/cancer_output_atlas/agent_tools.py`](src/cancer_output_atlas/agent_tools.py) | Real `@tool` wrappers, including live `find_public_outputs` plus offline helpers (refuse unsafe fetches, classify, link, rank, digest). Tests assert these are `strands.tools.decorator.DecoratedFunctionTool`. |
 | `python -m cancer_output_atlas agent` | Constructs `strands.Agent(tools=…, system_prompt=…)` and runs the official loop. `--no-llm` runs the same tools as plain functions. |
 | [`src/cancer_output_atlas/model_config.py`](src/cancer_output_atlas/model_config.py) | Pluggable text provider: `gemini` \| `strands` \| `none`. Keys come from the environment and are never logged or committed. |
 
-**Current truth about the live demo.** When `strands-agents` is installed (Cloud Run revision `cancer-output-atlas-00031-q4d` and later), `serve.py` constructs an official `strands.Agent` on each `GET /api/find` via `build_find_agent`, with a `find_public_outputs` tool that wraps `find_by_goal` on the baked graph. The tool payload is the user answer (no LLM synthesis of matches). Goal parsing inside `find_by_goal` is still `rank.parse_goal`: Gemini slot-parse when `GEMINI_API_KEY` is present, otherwise lexical. If Strands is unavailable, the same `find_by_goal` path runs without an agent. There is **no** Amazon Bedrock AgentCore deploy in this submission.
+**Live demo (revision `cancer-output-atlas-00031-q4d` and later).** `serve.py` constructs an official `strands.Agent` on each `GET /api/find` via `build_find_agent`, with a `find_public_outputs` tool that wraps `find_by_goal` on the baked graph. The tool payload is the user answer (no LLM synthesis of matches). Goal parsing inside `find_by_goal` is still `rank.parse_goal`: Gemini slot-parse when `GEMINI_API_KEY` is present, otherwise lexical. Offline CI can run without Strands installed; that path is for tests, not the contest live demo. This submission does not deploy Amazon Bedrock AgentCore.
 
 ---
 
@@ -131,7 +127,7 @@ python -m cancer_output_atlas serve --out out --port 8080
 # open http://127.0.0.1:8080/
 ```
 
-Empty-goal check (must abstain, must not invent IDs):
+Unrelated-goal check (must abstain):
 
 ```bash
 python -m cancer_output_atlas find \
@@ -139,17 +135,17 @@ python -m cancer_output_atlas find \
   --graph out/link_graph.json --out out
 ```
 
-### Live metadata ingest (still no omics download, still no invented IDs)
+### Live metadata ingest (daily harvest path)
 
 ```bash
 python -m cancer_output_atlas run --out out --check-links
 ```
 
-Failed fetches are **skipped**, not filled in from memory.
+Failed fetches are **skipped**, not filled in from memory. Honesty rules are in [Safety](#safety).
 
 ### Official Strands Agent loop
 
-Needs a model provider if you omit `--no-llm`. Default unattended `run` never constructs `Agent()`.
+Needs a model provider if you omit `--no-llm`.
 
 ```bash
 python -m cancer_output_atlas agent --offline --no-llm --out out
@@ -177,12 +173,13 @@ Artifacts in `out/` after `run`:
 
 ## Safety
 
-This product is public research-output metadata. It is **not** clinical advice and is not endorsed by NCBI, Figshare, ClinicalTrials.gov, cBioPortal, GDC, TCIA, Dockstore, or Arc Institute.
+This product is public research-output metadata. It is **not** clinical advice. It is **not** an NCI product or endorsement, and it is not endorsed by NCBI, Figshare, ClinicalTrials.gov, cBioPortal, GDC, TCIA, Dockstore, or Arc Institute.
 
 - **Public metadata only.** NCBI E-utilities, Figshare, ClinicalTrials.gov API v2, cBioPortal `/api/studies`, Dockstore TRS, GDC `/projects`, TCIA collection *names*, nf-core `pipelines.json`, Europe PMC REST, GitHub search. No scraping of paywalled pages.
-- **Never invent** GEO, SRA, DOI, or NCT identifiers. If it was not on the landing or in the API payload, it is not in the atlas.
+- **Never invent** GEO, SRA, DOI, NCT, or other accessions. If it was not on the landing or in the API payload, it is not in the atlas. When the current graph snapshot has no match, find **abstains** instead of fabricating an ID.
+- **No on-click ingest. No claim graph.** Each find ranks the current baked snapshot (`out/link_graph.json`). It does not call GEO or other catalog APIs at query time. New nodes enter through the offline daily harvest.
 - **Skip on fetch failure.** No guessed records.
-- **No PHI. No dbGaP file download.** `phs######` / “controlled access” are refused as fetch targets. HTAN/dbGaP is an apply-yourself pointer.
+- **No PHI. No dbGaP file download.** `phs######` / “controlled access” are refused as fetch targets. Controlled resources (dbGaP, HTAN sequencing, GDC BAM, COSMIC tables) appear only as apply-yourself pointers.
 - **Do not download** `.h5ad` / BAM / FASTQ / MTX / VCF / DICOM or other omics payloads. Figshare file *names* may be listed from metadata.
 - **`gs://` is a pointer.** Object-store URIs are never listed as downloads.
 - **GDC `/data`, `/slicing`, BAM** are refused. TCIA DICOM is refused. cBioPortal mutation/CNA matrix endpoints are refused. COSMIC tables are not scraped.

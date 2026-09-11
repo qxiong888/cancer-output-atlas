@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" role="img" aria-labelledby="title desc">
   <title id="title">Cancer Output Atlas architecture</title>
-  <desc id="desc">User goal goes to agent tools: parse_goal, retrieve a baked public-metadata graph, then ODS groups or abstain. Find does not re-ingest.</desc>
+  <desc id="desc">User goal goes to a Strands agent (find_public_outputs), parse_goal, retrieve a daily-refreshed public-metadata graph, then ODS groups or abstain.</desc>
   <style>
     .bg { fill: #fafafa; }
     .box { fill: #fff; stroke: #2b2b2b; stroke-width: 1.4; }
@@ -29,7 +29,7 @@
   <path class="arrow" d="M 172 120 H 214"/>
 
   <rect class="box-accent" x="216" y="80" width="176" height="80" rx="8"/>
-  <text class="label" x="304" y="112" text-anchor="middle">Agent tools</text>
+  <text class="label" x="304" y="112" text-anchor="middle">Strands agent</text>
   <text class="sub" x="304" y="132" text-anchor="middle">parse · retrieve · refuse</text>
 
   <path class="arrow" d="M 392 120 H 434"/>
@@ -53,9 +53,9 @@
   <text class="fine" x="688" y="154" text-anchor="end">none</text>
 
   <rect class="box-soft" x="32" y="248" width="856" height="140" rx="10"/>
-  <text class="label" x="52" y="278">What runs where</text>
-  <text class="sub" x="52" y="304">Live demo (Cloud Run / serve.py): GET /api/find → find_by_goal → parse_goal (Gemini slot-parse if a key is set, else lexical) → baked graph.</text>
-  <text class="sub" x="52" y="326">Does not construct strands.Agent on each find. No live ingest. No omics download.</text>
+  <text class="label" x="52" y="278">Live path and Strands SDK</text>
+  <text class="sub" x="52" y="304">Live demo (Cloud Run / serve.py): GET /api/find → strands.Agent + find_public_outputs → find_by_goal → parse_goal → baked graph.</text>
+  <text class="sub" x="52" y="326">Constructs strands.Agent on each find. Daily harvest refreshes the snapshot. Honesty rules: see README Safety.</text>
   <text class="sub" x="52" y="354">Official Strands SDK: runtime.py (Agent, @tool) and agent_tools.py. CLI: python -m cancer_output_atlas agent.</text>
   <text class="sub" x="52" y="376">Model provider is pluggable: gemini | strands | none. Keys via environment, never committed.</text>
 </svg>

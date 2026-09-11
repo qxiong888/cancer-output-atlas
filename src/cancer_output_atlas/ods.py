@@ -4,7 +4,6 @@ Official list (NCI ODS Impact Prize “cancer research output” definition):
 data, software, tools, methods and protocols, models, clinical trial
 results, biospecimens.
 Source: https://www.nih.gov/challenges/nci-office-data-sharing-impact-prize
-Not an NCI product or endorsement.
 """
 
 from __future__ import annotations
