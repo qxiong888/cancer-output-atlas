@@ -70,6 +70,9 @@
     font: inherit; font-size: 0.82rem; padding: 0.35rem 0 0.15rem; cursor: pointer;
   }
   .note { margin: 0; font-size: 0.88rem; color: #57606a; }
+  .feedback { margin-top: 1.4rem; }
+  .feedback a { color: #57606a; text-decoration: underline; text-underline-offset: 2px; }
+  .feedback a:hover { color: #0969da; }
 </style>
 </head>
 <body>
@@ -82,6 +85,7 @@
   </form>
   <p class="fine">Public metadata only. Controlled data is a pointer, not a download. Not for diagnosis, treatment, or prescribing.</p>
   <div id="results"></div>
+  <p class="fine feedback"><a id="report-issue" href="mailto:hello@swarmoraai.com">Report an issue</a></p>
 </main>
 <script type="application/json" id="fallback-a">__FALLBACK_A__</script>
 <script>
@@ -109,7 +113,24 @@
   var box = document.getElementById("results");
   var activeSlug = "all";
   var lastPayload = null;
+  var reportLink = document.getElementById("report-issue");
   goalBox.value = DEFAULT_GOAL;
+
+  function updateReportLink() {
+    if (!reportLink) return;
+    var goal = String(goalBox.value || "").trim();
+    var subject = "Cancer Output Atlas — issue report";
+    var body =
+      "What went wrong:\n\n\n" +
+      "Goal:\n" + goal + "\n\n" +
+      "(Optional) Result title or URL that looked wrong:\n";
+    reportLink.href =
+      "mailto:hello@swarmoraai.com" +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+  }
+  updateReportLink();
+  goalBox.addEventListener("input", updateReportLink);
 
   function esc(s) {
     return String(s == null ? "" : s)
