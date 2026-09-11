@@ -2,9 +2,9 @@
 
 **Apache-2.0** · [Agents for Humans](https://agentsforhumans.devpost.com/) · Professional Agents
 
-An agent that turns a researcher's reuse goal into a short list of **already-public cancer research outputs** they can actually open — datasets, software, workflows, models, trial records, and biospecimen pointers — grouped by output-type labels aligned with the NCI ODS Impact Prize definition of a [cancer research output](https://www.nih.gov/challenges/nci-office-data-sharing-impact-prize) (data, software, tools, methods/protocols, models, clinical trial results, biospecimens). Not an NCI product or endorsement.
+**Cancer Output Atlas** is an agent-managed living graph of public cancer research outputs, updated daily. A researcher types a reuse goal; the agent returns outputs they can actually open — datasets, software, workflows, models, trial records, and biospecimen pointers — grouped by output-type labels aligned with the NCI ODS Impact Prize definition of a [cancer research output](https://www.nih.gov/challenges/nci-office-data-sharing-impact-prize) (data, software, tools, methods/protocols, models, clinical trial results, biospecimens). Not an NCI product or endorsement.
 
-It does **not** invent GEO, NCT, DOI, or other accessions. If the baked graph has no match, it **abstains**.
+It does **not** invent GEO, NCT, DOI, or other accessions. If the current graph snapshot has no match, it **abstains**.
 
 **Live demo:** https://cancer-output-atlas-ulao4pneza-uc.a.run.app
 
@@ -18,11 +18,11 @@ Cancer Output Atlas:
 
 1. Takes a free-text goal (English or Chinese).
 2. Parses it into topic / type slots (`parse_goal`).
-3. Retrieves **only** nodes that already exist on a baked public-metadata graph.
+3. Retrieves **only** nodes that already exist on the current public-metadata graph snapshot.
 4. Groups hits by ODS type (data, software, tool, method, model, trial result, biospecimen).
 5. **Abstains** when nothing relevant is on the graph — it never fabricates an ID to fill the page.
 
-Find does **not** re-ingest. The graph is built offline from allow-listed public metadata APIs (or fixtures) and then frozen. Controlled resources (dbGaP, HTAN sequencing, GDC BAM, COSMIC tables) appear only as apply-yourself pointers.
+The catalog is **living**: agents harvest allow-listed public metadata APIs offline and refresh the graph **daily**, so coverage grows over time. Each find request ranks the **current baked snapshot** (`out/link_graph.json`) — it does not re-ingest from GEO or other APIs on click, and it does not download omics. Controlled resources (dbGaP, HTAN sequencing, GDC BAM, COSMIC tables) appear only as apply-yourself pointers.
 
 ## Who it is for
 
@@ -38,7 +38,7 @@ Typical goals the live demo is built for:
 
 ## Architecture
 
-User goal → agent tools → baked graph → ODS groups or abstain. No live ingest on find. No claim graph.
+Daily harvest keeps the living graph current. User goal → agent tools → current baked snapshot → ODS groups or abstain. No on-click ingest. No claim graph.
 
 ![Architecture](docs/architecture.svg)
 
@@ -48,14 +48,14 @@ flowchart LR
   A --> P["parse_goal"]
   A --> R["retrieve only existing nodes"]
   A --> X["abstain if empty"]
-  P --> G["link_graph.json<br/>public metadata only"]
+  P --> G["link_graph.json<br/>daily-refreshed snapshot"]
   R --> G
   G --> H{hits?}
   H -->|yes| O["ODS groups"]
   H -->|no| X
 ```
 
-The find path ranks a **baked** `out/link_graph.json`. It does not call GEO or any other API at query time, and it does not download omics.
+The find path ranks the **current** baked `out/link_graph.json` (the daily-refreshed living catalog). It does not call GEO or any other API at query time, and it does not download omics. New resources enter the catalog through the offline daily harvest, not through the request path.
 
 A second diagram of how the official SDK is wired:
 
