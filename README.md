@@ -8,6 +8,8 @@ It does **not** invent GEO, NCT, DOI, or other accessions. If the current graph 
 
 **Live demo:** https://cancer-output-atlas-ulao4pneza-uc.a.run.app
 
+The **3 September 2026** snapshot in this repo shows **9,935** public resource records across seven output types. Those figures describe a snapshot; the living catalog continues to evolve as daily updates add newly available resources.
+
 ---
 
 ## What it does
