@@ -62,18 +62,21 @@ A second diagram of how the official SDK is wired:
 ```mermaid
 flowchart TB
   subgraph live ["Live demo today — Cloud Run / serve.py"]
-    S["GET /api/find?goal=…"] --> F["find_by_goal"]
+    S["GET /api/find?goal=…"] --> AG["build_find_agent<br/>strands.Agent + find_public_outputs"]
+    AG --> F["find_by_goal on baked graph"]
     F --> PG["rank.parse_goal"]
-    PG -->|"GEMINI_API_KEY set → Gemini slot parse<br/>else lexical; does not construct Agent()"| G2["baked graph → ODS or abstain"]
+    PG -->|"GEMINI_API_KEY set → Gemini slot parse<br/>else lexical"| G2["ODS matches or abstain"]
   end
 
-  subgraph sdk ["Official Strands Agents SDK — what judges should read"]
+  subgraph sdk ["Official Strands Agents SDK"]
     RT["runtime.py<br/>from strands import Agent, tool"]
-    AT["agent_tools.py @tool<br/>refuse_unsafe · classify_output_json<br/>link_outputs_json · rank_by_goal_json<br/>emit_digest_text"]
+    AT["agent_tools.py @tool<br/>find_public_outputs + offline helpers"]
     CLI["coa agent<br/>build_agent → strands.Agent"]
     MC["model_config.py<br/>provider: gemini | strands | none"]
-    RT --> AT --> CLI
-    MC -.->|"COA_MODEL_PROVIDER=strands<br/>slot-parse / why only"| PG
+    RT --> AT
+    AT --> AG
+    AT --> CLI
+    MC -.->|"slot-parse / why text"| PG
   end
 ```
 
@@ -86,13 +89,11 @@ Judges score **thorough use of the official Strands Agents SDK**. This repo uses
 | File | What it is |
 |------|------------|
 | [`src/cancer_output_atlas/runtime.py`](src/cancer_output_atlas/runtime.py) | **Only** module that imports Strands. `from strands import Agent, tool`. `build_agent()` constructs an official `strands.Agent`. If the import fails, `@tool` degrades to a passthrough so offline tests still run — that fallback is **not** a Strands API. |
-| [`src/cancer_output_atlas/agent_tools.py`](src/cancer_output_atlas/agent_tools.py) | Real `@tool` wrappers: refuse unsafe fetches, classify one output, link outputs, rank by goal, emit a what/why/ids digest. Tests assert these are `strands.tools.decorator.DecoratedFunctionTool`. |
+| [`src/cancer_output_atlas/agent_tools.py`](src/cancer_output_atlas/agent_tools.py) | Real `@tool` wrappers, including live `find_public_outputs` plus offline helpers (refuse unsafe fetches, classify, link, rank, digest). Tests assert these are `strands.tools.decorator.DecoratedFunctionTool`. |
 | `python -m cancer_output_atlas agent` | Constructs `strands.Agent(tools=…, system_prompt=…)` and runs the official loop. `--no-llm` runs the same tools as plain functions. |
 | [`src/cancer_output_atlas/model_config.py`](src/cancer_output_atlas/model_config.py) | Pluggable text provider: `gemini` \| `strands` \| `none`. Keys come from the environment and are never logged or committed. |
 
-**Current truth about the live demo.** `serve.py` ranks the baked graph through `find_by_goal`. Goal parsing is `rank.parse_goal`: Gemini slot-parse when `GEMINI_API_KEY` is present, otherwise the lexical parser. The Cloud Run container does **not** construct `strands.Agent` on each find. Setting `COA_MODEL_PROVIDER=strands` routes slot-parse / retrieved-only “why” text through official Strands (`generate_text` in `model_config.py`). There is **no** Amazon Bedrock AgentCore deploy in this submission.
-
-Wiring Strands as the live `/api/find` path is a later pass. Do not treat the live URL as proof that `Agent()` is already on the request path.
+**Current truth about the live demo.** When `strands-agents` is installed (Cloud Run revision `cancer-output-atlas-00031-q4d` and later), `serve.py` constructs an official `strands.Agent` on each `GET /api/find` via `build_find_agent`, with a `find_public_outputs` tool that wraps `find_by_goal` on the baked graph. The tool payload is the user answer (no LLM synthesis of matches). Goal parsing inside `find_by_goal` is still `rank.parse_goal`: Gemini slot-parse when `GEMINI_API_KEY` is present, otherwise lexical. If Strands is unavailable, the same `find_by_goal` path runs without an agent. There is **no** Amazon Bedrock AgentCore deploy in this submission.
 
 ---
 
@@ -101,7 +102,7 @@ Wiring Strands as the live `/api/find` path is a later pass. Do not treat the li
 Needs Python 3.10+. No API key is required for the offline path.
 
 ```bash
-git clone https://github.com/<you>/cancer-output-atlas.git
+git clone https://github.com/qxiong888/cancer-output-atlas.git
 cd cancer-output-atlas
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
