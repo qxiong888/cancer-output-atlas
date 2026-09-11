@@ -124,11 +124,17 @@
     }
     var overlap = [];
     var src = r.goal_overlap || [];
+    var seen = {};
+    function ck(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, ""); }
     for (var i = 0; i < src.length && overlap.length < 4; i++) {
-      var t = String(src[i] || "");
-      if (t && !STOP[t.toLowerCase()] && !hasCjk(t)) overlap.push(t);
+      var t = String(src[i] || "").trim();
+      if (!t || STOP[t.toLowerCase()] || hasCjk(t)) continue;
+      var k = ck(t);
+      if (k && seen[k]) continue;
+      if (k) seen[k] = true;
+      overlap.push(t);
     }
-    if (overlap.length) return "Matches " + overlap.join(" ");
+    if (overlap.length) return "Matches " + overlap.join(" · ");
     return "";
   }
   function fallbackA() {

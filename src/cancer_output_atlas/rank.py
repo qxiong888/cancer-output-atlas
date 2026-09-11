@@ -1285,6 +1285,99 @@ _FIELD_W = {
 _W_SUM = sum(_FIELD_W.values())
 
 
+
+def _facet_display_label(facet: tuple[str, ...]) -> str:
+    """One human chip per AND facet (canonical labels for UI)."""
+    norms = {_norm(s) for s in facet}
+    # Canonical disease / drug / assay chips
+    if norms & {"nsclc", "non small cell lung", "non-small cell lung", "nonsmallcelllung", "luad", "lusc", "lung adenocarcinoma", "lungadenocarcinoma"}:
+        return "NSCLC"
+    if norms & {"breast", "breast cancer", "breastcancer"}:
+        return "breast cancer"
+    if norms & {"pembrolizumab", "keytruda", "mk-3475", "mk3475", "mk 3475"}:
+        return "pembrolizumab / Keytruda"
+    if norms & {"immunotherapy", "immuno", "checkpoint", "pd-1", "pd1", "pd-l1", "pdl1", "pd l1"}:
+        return "immunotherapy"
+    assay_map = {
+        "rna seq": "rna-seq",
+        "rnaseq": "rna-seq",
+        "scrna seq": "scRNA-seq",
+        "single cell rna seq": "scRNA-seq",
+        "bulk rna seq": "bulk RNA-seq",
+    }
+    ordered = sorted(facet, key=lambda s: (0 if " " in _norm(s) else 1, -len(s), s))
+    if not ordered:
+        return ""
+    label = _norm(ordered[0])
+    return assay_map.get(label, label)
+
+
+def _public_overlap(
+    phrases: list[str],
+    *,
+    query: GoalQuery | None = None,
+    rec: OutputRecord | None = None,
+    limit: int = 4,
+) -> list[str]:
+    """Matches chips: one label per matched AND facet (breast cancer · rna-seq)."""
+    out: list[str] = []
+    seen_c: set[str] = set()
+
+    def add(label: str) -> None:
+        n = _norm(label.replace("-", " "))
+        c = _compact(n)
+        if not n or c in seen_c:
+            return
+        if " " not in n and "-" not in label and any(
+            n in _norm(x.replace("-", " ")).split() for x in out
+        ):
+            return
+        seen_c.add(c)
+        out.append(label)
+
+    if query is not None and rec is not None and getattr(query, "required_facets", ()):
+        blob = _record_blob(rec)
+        compact = _compact(blob)
+        title_blob = _norm(rec.title or "")
+        title_compact = _compact(title_blob)
+        assay_facet = any(_is_assay_facet(fac) for fac in query.required_facets)
+        for fac in query.required_facets:
+            if _is_disease_facet(fac) and assay_facet:
+                scope_blob, scope_compact = title_blob, title_compact
+            else:
+                scope_blob, scope_compact = blob, compact
+            multi = tuple(s for s in fac if " " in _norm(s) or len(_compact(s)) >= 10)
+            short = tuple(s for s in fac if s not in multi)
+            ok = False
+            if multi and _facet_matches_record(multi, scope_blob, scope_compact):
+                ok = True
+            elif short and _facet_matches_record(
+                short,
+                scope_blob,
+                scope_compact,
+                title_blob=title_blob,
+                title_compact=title_compact,
+                prefer_title_for_short=True,
+            ):
+                ok = True
+            elif (not _is_disease_facet(fac)) and _facet_matches_record(fac, blob, compact):
+                ok = True
+            if ok:
+                add(_facet_display_label(fac))
+        if out:
+            return out[:limit]
+
+    ordered = sorted(
+        (ph for ph in phrases if ph and ph not in JUNK_PHRASES),
+        key=lambda s: (0 if " " in _norm(s) else 1, -len(s), s),
+    )
+    for ph in ordered:
+        add(ph if (" " in ph or "-" in ph) else _norm(ph))
+        if len(out) >= limit:
+            break
+    return out
+
+
 def _active_phrases(query: GoalQuery) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
@@ -1410,7 +1503,7 @@ def score_record_against_goal(rec: OutputRecord, query: GoalQuery) -> dict[str, 
             overlap.append(ph)
     return {
         "rank_score": round(min(1.0, score), 3),
-        "goal_overlap": overlap[:6] or ([hit.phrase_hit] if hit.phrase_hit else []),
+        "goal_overlap": _public_overlap(overlap, query=query, rec=rec) or ([hit.phrase_hit] if hit.phrase_hit else []),
         "why": _why_text(hit.phrase_field or "title", hit.phrase_hit or query.topic_text),
         "profile_fit": 0.0 if rec.classification is None else float(rec.classification.profile_fit or 0.0),
         "_ods": hit.ods,
@@ -1545,7 +1638,7 @@ def rank_records(
                 overlap.append(ph)
         row = classification_row(rec)
         row["rank_score"] = round(min(1.0, base), 3)
-        row["goal_overlap"] = overlap[:6] or ([hit.phrase_hit] if hit.phrase_hit else list(q.phrases[:2]))
+        row["goal_overlap"] = _public_overlap(overlap, query=q, rec=rec) or ([hit.phrase_hit] if hit.phrase_hit else list(q.phrases[:2]))
         row["why"] = _why_text(hit.phrase_field or "title", hit.phrase_hit or q.topic_text)
         row["_title_phrases"] = title_n
         row["_phrase_hits"] = any_n
