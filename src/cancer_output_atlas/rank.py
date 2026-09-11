@@ -263,19 +263,90 @@ _DRUG_FACET_GROUPS: tuple[frozenset[str], ...] = (
     frozenset({"immunotherapy", "immuno", "checkpoint", "pd-1", "pd1", "pd-l1", "pdl1"}),
 )
 
-_DISEASE_FACET_GROUPS: tuple[frozenset[str], ...] = (
-    frozenset({"breast", "breastcancer", "breast cancer"}),
-    frozenset({
-        "nsclc",
-        "non small cell lung",
-        "non-small cell lung",
-        "nonsmallcelllung",
-        "lung adenocarcinoma",
-        "lungadenocarcinoma",
-        "luad",
-        "lusc",
-    }),
+# Each disease facet: triggers must appear in the RAW goal; match synonyms gate records.
+# Keep triggers narrow so synonym expansion / substring aliases cannot invent extra AND facets.
+_DISEASE_FACET_SPECS: tuple[tuple[str, frozenset[str], frozenset[str]], ...] = (
+    (
+        "breast cancer",
+        frozenset({"breast", "breastcancer", "breast cancer"}),
+        frozenset({"breast", "breastcancer", "breast cancer"}),
+    ),
+    (
+        "lung cancer",
+        frozenset({
+            "lung cancer",
+            "lungcancer",
+            "lung adenocarcinoma",
+            "lungadenocarcinoma",
+            "lung squamous",
+            "lung squamous cell",
+            "sclc",
+            "small cell lung cancer",
+        }),
+        frozenset({
+            "lung cancer",
+            "lungcancer",
+            "lung adenocarcinoma",
+            "lungadenocarcinoma",
+            "lung squamous",
+            "lung squamous cell",
+            "sclc",
+            "small cell lung",
+            "small cell lung cancer",
+        }),
+    ),
+    (
+        "NSCLC",
+        frozenset({
+            "nsclc",
+            "non small cell lung",
+            "non-small cell lung",
+            "nonsmallcelllung",
+            "luad",
+            "lusc",
+        }),
+        frozenset({
+            "nsclc",
+            "non small cell lung",
+            "non-small cell lung",
+            "nonsmallcelllung",
+            "luad",
+            "lusc",
+            "lung adenocarcinoma",
+            "lungadenocarcinoma",
+            "lung squamous",
+            "lung squamous cell",
+        }),
+    ),
+    (
+        "melanoma",
+        frozenset({"melanoma"}),
+        frozenset({"melanoma"}),
+    ),
+    (
+        "ovarian cancer",
+        frozenset({"ovarian", "ovarian cancer", "ovariancancer"}),
+        frozenset({"ovarian", "ovarian cancer", "ovariancancer"}),
+    ),
+    (
+        "prostate cancer",
+        frozenset({"prostate", "prostate cancer", "prostatecancer"}),
+        frozenset({"prostate", "prostate cancer", "prostatecancer"}),
+    ),
+    (
+        "colorectal cancer",
+        frozenset({"colorectal", "crc", "colorectal cancer", "colorectalcancer"}),
+        frozenset({"colorectal", "crc", "colorectal cancer", "colorectalcancer"}),
+    ),
+    (
+        "pancreatic cancer",
+        frozenset({"pancreatic", "pancreatic cancer", "pancreaticcancer"}),
+        frozenset({"pancreatic", "pancreatic cancer", "pancreaticcancer"}),
+    ),
 )
+
+# Back-compat alias for any leftover imports/tests.
+_DISEASE_FACET_GROUPS: tuple[frozenset[str], ...] = tuple(spec[2] for spec in _DISEASE_FACET_SPECS)
 
 DISTINCTIVE = frozenset(
     {
@@ -693,61 +764,107 @@ def _extract_assay_phrases(raw: str) -> list[str]:
     return found
 
 
-def _facet_groups_from_goal(raw: str, phrases: list[str], tokens: list[str]) -> tuple[tuple[str, ...], ...]:
-    """Build AND facets: disease, drug/therapy families, assay phrases."""
-    blob_parts = [_norm(raw)] + [_norm(p) for p in phrases] + [_norm(t) for t in tokens]
-    blob = " ".join(blob_parts)
-    compact = _compact(blob)
+
+def _phrase_tokens_in_blob(phrase: str, blob: str) -> bool:
+    """True if phrase tokens appear as a contiguous span in blob tokens.
+
+    Rejects ``small cell lung`` inside ``non small cell lung``.
+    """
+    ptoks = [t for t in _norm(phrase).split() if t]
+    btoks = [t for t in _norm(blob).split() if t]
+    if not ptoks or len(ptoks) > len(btoks):
+        return False
+    m = len(ptoks)
+    for i in range(len(btoks) - m + 1):
+        if btoks[i : i + m] != ptoks:
+            continue
+        if ptoks and ptoks[0] == "small" and i > 0 and btoks[i - 1] == "non":
+            continue
+        return True
+    return False
+
+
+def _alias_in_goal(alias: str, bag: set[str], blob: str) -> bool:
+    """True if alias is intentionally present in the RAW goal (no short-code substrings)."""
+    ng = _norm(alias)
+    cg = _compact(alias)
+    if not ng:
+        return False
+    if ng in bag or (cg and cg in bag):
+        return True
+    if " " in ng and _phrase_tokens_in_blob(ng, blob):
+        return True
+    # Long single tokens only (avoid 3–5 letter codes as substrings of nsclc etc.).
+    if " " not in ng and len(ng) >= 10 and ng in blob.split():
+        return True
+    return False
+
+
+def _facet_groups_from_goal(raw: str, phrases: list[str] | None = None, tokens: list[str] | None = None) -> tuple[tuple[str, ...], ...]:
+    """Build AND facets from the RAW goal only (ignore synonym expansion).
+
+    ``phrases`` / ``tokens`` are accepted for call-site back-compat but unused for
+    disease/drug triggers — expanded NSCLC→lung adenocarcinoma must not invent facets.
+    """
+    del phrases, tokens  # explicit: do not use expanded synonyms for facet triggers
+    blob = _norm(raw or "")
     bag = set(_latin_tokens(blob))
-    for p in phrases:
-        bag.add(_norm(p))
-        bag.add(_compact(p))
+    # Keep multi-word spans that literally appear in the raw goal.
+    for n in range(2, 6):
+        toks = blob.split()
+        for i in range(0, max(0, len(toks) - n + 1)):
+            ph = " ".join(toks[i : i + n])
+            bag.add(ph)
+            bag.add(_compact(ph))
     facets: list[tuple[str, ...]] = []
+    fired_labels: list[str] = []
 
-    # Disease groups present in the goal
-    for group in _DISEASE_FACET_GROUPS:
-        hit = False
-        syns: list[str] = []
-        for g in group:
-            syns.append(g)
-            ng = _norm(g)
-            cg = _compact(g)
-            if ng in bag or (cg and cg in compact) or ng in blob:
-                hit = True
-        if hit:
-            # expand NSCLC group with phrase forms already in query phrases
-            facets.append(tuple(sorted(set(syns), key=lambda s: (-len(s), s))))
+    for label, triggers, match_syns in _DISEASE_FACET_SPECS:
+        if any(_alias_in_goal(g, bag, blob) for g in triggers):
+            facets.append(tuple(sorted(match_syns, key=lambda s: (-len(s), s))))
+            fired_labels.append(label)
 
-    # Drug / therapy: pembrolizumab OR keytruda is one facet; immunotherapy another if present
+    # NSCLC is more specific than broad lung cancer — drop the broad chip if both fire.
+    if "NSCLC" in fired_labels and "lung cancer" in fired_labels:
+        keep: list[tuple[str, ...]] = []
+        labels_keep: list[str] = []
+        for fac, lab in zip(facets, fired_labels):
+            if lab == "lung cancer":
+                continue
+            keep.append(fac)
+            labels_keep.append(lab)
+        facets, fired_labels = keep, labels_keep
+
+    # Explicit "<site> cancer" in raw when not already covered by a fired disease facet.
+    covered_sites = set()
+    for lab in fired_labels:
+        covered_sites.add(_norm(lab).replace(" cancer", "").strip())
+        covered_sites.add(_norm(lab))
+    for n in range(2, 5):
+        toks = blob.split()
+        for i in range(0, max(0, len(toks) - n + 1)):
+            nph = " ".join(toks[i : i + n])
+            if not nph.endswith(" cancer") or len(nph) <= 7:
+                continue
+            site = nph[: -len(" cancer")].strip()
+            if not site or site in GENERIC_ALONE or site in {"the", "a", "human", "non", "small", "cell"}:
+                continue
+            if site in covered_sites or nph in covered_sites:
+                continue
+            if any(site in {_norm(x) for x in fac} or nph in {_norm(x) for x in fac} for fac in facets):
+                continue
+            facets.append((nph, _compact(nph), site))
+            covered_sites.add(site)
+            covered_sites.add(nph)
+
     for group in _DRUG_FACET_GROUPS:
-        present = []
-        for g in group:
-            ng = _norm(g)
-            cg = _compact(g)
-            if ng in bag or ng in blob or (len(cg) >= 4 and cg in compact):
-                present.append(g)
-        if present:
-            # facet satisfied by any synonym in the full group (keytruda counts for pembrolizumab facet)
+        if any(_alias_in_goal(g, bag, blob) for g in group):
             facets.append(tuple(sorted(group, key=lambda s: (-len(s), s))))
 
-    # Assay phrases from raw (pre-norm)
-    # Drop generic+assay junk bigrams ("cancer rna") — assay is a separate AND facet.
-    _assay_bits = {"rna", "seq", "rnaseq", "scrna", "sequencing"}
-    phrases = [
-        ph
-        for ph in phrases
-        if not (
-            " " in ph
-            and any(a in _norm(ph).split() for a in _assay_bits)
-            and any(g in _norm(ph).split() for g in GENERIC_ALONE)
-        )
-    ]
     assays = _extract_assay_phrases(raw)
     if assays:
-        # one assay facet: any extracted assay form
         facets.append(tuple(assays))
 
-    # Dedup identical facet tuples
     out: list[tuple[str, ...]] = []
     seen_f: set[tuple[str, ...]] = set()
     for f in facets:
@@ -913,7 +1030,7 @@ def parse_goal_lexical(goal: str) -> GoalQuery:
     phrases = known + extra_phrases + topic_unigrams
     leftover_for_content = [t for t in raw_left if t not in FILLER and not _is_weak_alone(t)]
     # Drop generic+assay junk bigrams ("cancer rna") — assay is a separate AND facet.
-    _assay_bits = {"rna", "seq", "rnaseq", "scrna", "sequencing"}
+    _assay_bits = {"rna", "seq", "rnaseq", "scrna", "sequencing", "single", "cell", "cells"}
     phrases = [
         ph
         for ph in phrases
@@ -1290,10 +1407,16 @@ def _facet_display_label(facet: tuple[str, ...]) -> str:
     """One human chip per AND facet (canonical labels for UI)."""
     norms = {_norm(s) for s in facet}
     # Canonical disease / drug / assay chips
-    if norms & {"nsclc", "non small cell lung", "non-small cell lung", "nonsmallcelllung", "luad", "lusc", "lung adenocarcinoma", "lungadenocarcinoma"}:
-        return "NSCLC"
     if norms & {"breast", "breast cancer", "breastcancer"}:
         return "breast cancer"
+    # NSCLC chip: prefer when nsclc/luad/lusc triggers are in the facet match set
+    # and the facet was the NSCLC spec (has nsclc code among match syns with luad).
+    if norms & {"nsclc", "non small cell lung", "non-small cell lung", "nonsmallcelllung", "luad", "lusc"} and (
+        "nsclc" in norms or "luad" in norms or "lusc" in norms or "non small cell lung" in norms or "non-small cell lung" in norms
+    ):
+        return "NSCLC"
+    if norms & {"lung cancer", "lungcancer", "lung adenocarcinoma", "lungadenocarcinoma", "lung squamous", "sclc", "small cell lung", "small cell lung cancer"}:
+        return "lung cancer"
     if norms & {"pembrolizumab", "keytruda", "mk-3475", "mk3475", "mk 3475"}:
         return "pembrolizumab / Keytruda"
     if norms & {"immunotherapy", "immuno", "checkpoint", "pd-1", "pd1", "pd-l1", "pdl1", "pd l1"}:
