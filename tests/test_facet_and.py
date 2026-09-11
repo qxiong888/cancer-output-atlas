@@ -59,3 +59,14 @@ def test_keytruda_nsclc():
     labs = _labels("Keytruda NSCLC")
     assert "NSCLC" in labs and "pembrolizumab / Keytruda" in labs
     assert "lung cancer" not in labs
+
+
+def test_scrna_not_or_bulk_rna():
+    labs = _labels("lung cancer single-cell RNA-seq")
+    assert "scRNA-seq" in labs and "rna-seq" not in labs
+
+
+def test_broad_rnaseq_chip_not_scrna():
+    labs = _labels("breast cancer RNA-seq")
+    assert "breast cancer" in labs and "rna-seq" in labs
+    assert "scRNA-seq" not in labs

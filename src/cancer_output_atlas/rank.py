@@ -752,15 +752,72 @@ def _doi_from_goal(raw: str) -> str | None:
 
 
 def _extract_assay_phrases(raw: str) -> list[str]:
-    """Keep hyphenated assay phrases before _norm splits them apart."""
+    """Keep hyphenated assay phrases before _norm splits them apart.
+
+    Prefer the most specific assay span: ``single-cell RNA-seq`` must not also
+    register a bare ``rna-seq`` hit from the same substring (that OR would let
+    bulk RNA-seq records pass an scRNA AND gate).
+    """
     found: list[str] = []
     seen: set[str] = set()
+    occupied: list[tuple[int, int]] = []
     for cre in _ASSAY_PHRASE_RES:
         for m in cre.finditer(raw or ""):
+            span = (m.start(1), m.end(1))
+            # Skip if this match sits inside a longer assay span already taken
+            if any(span[0] >= a and span[1] <= b for a, b in occupied):
+                continue
             ph = _norm(m.group(1))
-            if ph and ph not in seen:
-                seen.add(ph)
-                found.append(ph)
+            if not ph or ph in seen:
+                continue
+            # Drop any previously kept shorter spans fully covered by this one
+            drop: list[str] = []
+            for prev in list(found):
+                # covered by specificity handled below; keep list clean of nested
+                pass
+            seen.add(ph)
+            found.append(ph)
+            occupied.append(span)
+    return _narrow_assay_phrases(found)
+
+
+_SCRNA_NORM = frozenset(
+    {
+        "single cell rna seq",
+        "scrna seq",
+        "scrnaseq",
+        "sc rna seq",
+    }
+)
+_BULK_RNA_NORM = frozenset({"bulk rna seq", "bulkrnaseq"})
+_RNA_SEQ_NORM = frozenset({"rna seq", "rnaseq", "rna sequencing"})
+
+
+def _narrow_assay_phrases(found: list[str]) -> list[str]:
+    """Collapse assay hits to one specificity tier for AND matching."""
+    norms = [_norm(x) for x in found]
+    if any(n in _SCRNA_NORM or n.startswith("single cell rna") for n in norms):
+        # Strict scRNA gate — do NOT OR in bare rna-seq (bulk would pass).
+        return [
+            "single cell rna seq",
+            "scrna seq",
+            "scrnaseq",
+            "single-cell rna-seq",
+            "scRNA-seq",
+        ]
+    if any(n in _BULK_RNA_NORM for n in norms):
+        return ["bulk rna seq", "bulkrnaseq", "bulk RNA-seq"]
+    if any(n in _RNA_SEQ_NORM for n in norms):
+        # Broad RNA-seq: child scRNA may satisfy; chip-seq / atac must not.
+        return [
+            "rna seq",
+            "rnaseq",
+            "rna sequencing",
+            "single cell rna seq",
+            "scrna seq",
+            "scrnaseq",
+            "bulk rna seq",
+        ]
     return found
 
 
@@ -971,6 +1028,23 @@ def _required_facets_pass(rec: OutputRecord, query: GoalQuery) -> bool:
             if not ok:
                 return False
             continue
+        if _is_assay_facet(fac):
+            fac_n = {_norm(s) for s in fac}
+            wants_scrna = any(n in _SCRNA_NORM or n.startswith("single cell") for n in fac_n)
+            has_broad_rna = any(n in _RNA_SEQ_NORM or n in _BULK_RNA_NORM for n in fac_n)
+            if wants_scrna and not has_broad_rna:
+                if not re.search(
+                    r"(?i)\b(single[\s-]?cell|scRNA|scrna[\s-]?seq|sc[\s-]?rna)\b",
+                    blob,
+                ):
+                    return False
+            elif has_broad_rna or wants_scrna:
+                # Reject chromatin-only assays posing as RNA-seq
+                if re.search(r"(?i)\b(chip[\s-]?seq|atac[\s-]?seq)\b", blob) and not re.search(
+                    r"(?i)\b(rna[\s-]?seq|rnaseq|scrna|transcriptom|rna sequencing)\b",
+                    blob,
+                ):
+                    return False
         if not _facet_matches_record(fac, blob, compact, title_blob=title_blob, title_compact=title_compact):
             return False
     return True
@@ -1421,6 +1495,16 @@ def _facet_display_label(facet: tuple[str, ...]) -> str:
         return "pembrolizumab / Keytruda"
     if norms & {"immunotherapy", "immuno", "checkpoint", "pd-1", "pd1", "pd-l1", "pdl1", "pd l1"}:
         return "immunotherapy"
+    # Broad RNA-seq facets may list scRNA as a *match child*; chip must stay rna-seq
+    # unless the facet is scRNA-only (no bare rna-seq / bulk synonyms).
+    if any(n in _SCRNA_NORM or n.startswith("single cell") for n in norms) and not any(
+        n in _RNA_SEQ_NORM or n in _BULK_RNA_NORM for n in norms
+    ):
+        return "scRNA-seq"
+    if any(n in _BULK_RNA_NORM for n in norms) and not any(n in _RNA_SEQ_NORM | _SCRNA_NORM for n in norms):
+        return "bulk RNA-seq"
+    if any(n in _RNA_SEQ_NORM or n in _BULK_RNA_NORM or n in _SCRNA_NORM for n in norms):
+        return "rna-seq"
     assay_map = {
         "rna seq": "rna-seq",
         "rnaseq": "rna-seq",
