@@ -30,8 +30,8 @@ Cancer researchers and computational biologists who need **reusable public outpu
 
 Typical goals the live demo is built for:
 
-- virtual cell / Arc Virtual Cell Atlas resources
-- lung / NSCLC public data and trials
+- NSCLC pembrolizumab / Keytruda immunotherapy resources (the live default goal)
+- breast cancer RNA-seq public data
 - a nonsense or empty goal, which must abstain
 
 ---
@@ -122,7 +122,7 @@ Then find or serve against the graph you just wrote:
 
 ```bash
 python -m cancer_output_atlas find \
-  --goal "virtual cell related dataset" \
+  --goal "Find public NSCLC pembrolizumab / Keytruda immunotherapy resources I can reuse" \
   --graph out/link_graph.json --out out
 
 python -m cancer_output_atlas serve --out out --port 8080
