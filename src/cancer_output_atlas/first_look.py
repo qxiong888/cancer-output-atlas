@@ -82,3 +82,4 @@ def first_look_hits(by_ods: dict[str, list[dict[str, Any]]], n: int = 3) -> list
             pool.append(h)
     pool.sort(key=lambda h: (-float(h.get("rank_score") or 0), str(h.get("output_id") or "")))
     return pool[:n]
+

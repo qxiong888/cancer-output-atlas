@@ -245,3 +245,4 @@ def classify(rec: OutputRecord, goal: str = GOAL_DEFAULT) -> OutputRecord:
     }
     persist_ods(rec)
     return rec
+

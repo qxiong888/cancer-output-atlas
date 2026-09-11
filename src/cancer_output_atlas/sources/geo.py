@@ -77,3 +77,4 @@ def record_from_esummary(acc: str, rec: dict[str, Any], source: str) -> OutputRe
         disease_types=geo_structured_types(rec),
         year=year_from_structured(rec.get("pdat") or rec.get("pdyear")),
     )
+

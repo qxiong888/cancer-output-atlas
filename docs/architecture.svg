@@ -59,3 +59,4 @@
   <text class="sub" x="52" y="354">Official Strands SDK: runtime.py (Agent, @tool) and agent_tools.py. CLI: python -m cancer_output_atlas agent.</text>
   <text class="sub" x="52" y="376">Model provider is pluggable: gemini | strands | none. Keys via environment, never committed.</text>
 </svg>
+

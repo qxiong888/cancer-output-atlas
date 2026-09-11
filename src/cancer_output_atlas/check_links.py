@@ -256,3 +256,4 @@ def graph_from_json(payload: dict) -> AtlasGraph:
         skipped=list(payload.get("skipped") or []),
         policy=dict(payload.get("policy") or POLICY),
     )
+

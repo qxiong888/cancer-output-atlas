@@ -183,3 +183,4 @@ def make_find_tool(records, *, graph_path=None, cache=None, top_default: int = 4
         )
 
     return find_public_outputs
+

@@ -37,3 +37,4 @@ def get_json(url: str, timeout: float = 20.0) -> Any:
         return json.loads(text)
     except json.JSONDecodeError as exc:
         raise FetchError(f"non-JSON response from {url}") from exc
+

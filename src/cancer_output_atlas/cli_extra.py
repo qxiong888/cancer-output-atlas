@@ -64,3 +64,4 @@ def add_find_and_serve(sub: argparse._SubParsersAction) -> None:
     srv.add_argument("--host", default="0.0.0.0")
     srv.add_argument("--port", type=int, default=8080)
     srv.set_defaults(func=cmd_serve)
+

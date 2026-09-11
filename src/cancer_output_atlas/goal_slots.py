@@ -137,3 +137,4 @@ def try_llm_why(goal: str, row: dict[str, Any], fallback: str) -> str:
     if _invented_id(text, allowed):
         return fallback
     return text[:80] or fallback
+

@@ -168,3 +168,4 @@ def user_agent() -> str:
     email = os.environ.get("NCBI_EMAIL", "").strip()
     base = os.environ.get("COA_USER_AGENT", "CancerOutputAtlas/0.1 (public metadata only)")
     return f"{base} {email}".strip()
+

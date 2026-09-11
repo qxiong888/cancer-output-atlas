@@ -180,3 +180,4 @@ def main(argv: list[str] | None = None) -> int:
         print("rank requires --table or --graph", file=sys.stderr)
         return 2
     return args.func(args)
+

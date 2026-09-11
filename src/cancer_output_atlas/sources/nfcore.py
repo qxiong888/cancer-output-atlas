@@ -71,3 +71,4 @@ def records_from_pipelines_fixture(payload: Any, source: str = "fixture") -> lis
         except FetchError:
             continue
     return out
+

@@ -103,3 +103,4 @@ def records_from_query_fixture(payload: dict[str, Any], source: str) -> list[Out
         except FetchError:
             continue
     return out
+

@@ -184,3 +184,4 @@ def link_outputs(records: list[OutputRecord]) -> list[Link]:
                     )
 
     return links
+

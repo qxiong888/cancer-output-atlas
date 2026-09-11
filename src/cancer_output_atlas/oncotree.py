@@ -161,3 +161,4 @@ def write_cancer_types_table(records: list[OutputRecord], out_dir: Path) -> dict
     except ImportError:
         pass
     return paths
+

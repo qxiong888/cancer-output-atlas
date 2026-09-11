@@ -194,3 +194,4 @@ def serve(out_dir: Path, *, graph_path: Path | None = None, host: str = "0.0.0.0
     print(f"file: {out_dir / 'demo.html'}")
     print(f"graph: {graph_path} nodes={len(records)}")
     httpd.serve_forever()
+

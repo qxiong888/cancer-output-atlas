@@ -91,3 +91,4 @@ def records_from_studies_fixture(payload: Any, source: str = "fixture") -> list[
         except FetchError:
             continue
     return out
+

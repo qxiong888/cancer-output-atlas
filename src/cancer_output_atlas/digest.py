@@ -76,3 +76,4 @@ def render_digest(graph: AtlasGraph, ranked: list[dict] | None = None) -> str:
             )
     lines.append("")
     return "\n".join(lines)
+

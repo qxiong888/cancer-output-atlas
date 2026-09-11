@@ -61,3 +61,4 @@ def records_from_collections_fixture(payload: Any, source: str = "fixture") -> l
         except FetchError:
             continue
     return out
+

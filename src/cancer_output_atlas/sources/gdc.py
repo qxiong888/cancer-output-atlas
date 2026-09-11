@@ -79,3 +79,4 @@ def records_from_projects_fixture(payload: Any, source: str = "fixture") -> list
         except FetchError:
             continue
     return out
+

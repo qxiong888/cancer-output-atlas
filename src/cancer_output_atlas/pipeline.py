@@ -854,3 +854,4 @@ def write_artifacts(graph: AtlasGraph, ranked: list[dict[str, Any]], out_dir: Pa
     extra = write_cancer_types_table(graph.nodes, out_dir)
     paths.update({f"cancer_types_{k}": v for k, v in extra.items()})
     return paths
+

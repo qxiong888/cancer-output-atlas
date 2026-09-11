@@ -18,3 +18,4 @@ RUN pip install --no-cache-dir .
 
 EXPOSE 8080
 CMD ["sh", "-c", "exec python -m cancer_output_atlas serve --out /app/out --host 0.0.0.0"]
+

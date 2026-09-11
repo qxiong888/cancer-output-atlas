@@ -102,3 +102,4 @@ def records_from_fixture(payload: Any, source: str = "fixture") -> list[OutputRe
         except FetchError:
             continue
     return out
+

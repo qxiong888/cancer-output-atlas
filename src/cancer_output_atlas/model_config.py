@@ -146,3 +146,4 @@ def generate_text(system: str, user: str, *, timeout: float = 8.0) -> str | None
     if prov == "strands":
         return _strands_generate(system, user, timeout)
     return None
+

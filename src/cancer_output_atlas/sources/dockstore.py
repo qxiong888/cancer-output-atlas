@@ -75,3 +75,4 @@ def records_from_tools_fixture(payload: Any, source: str = "fixture") -> list[Ou
         except FetchError:
             continue
     return out
+

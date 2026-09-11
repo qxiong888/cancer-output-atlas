@@ -159,3 +159,4 @@ def structured_topics(*groups: Any) -> list[str]:
             seen.add(key)
             out.append(text)
     return out
+

@@ -42,3 +42,4 @@ flowchart TB
 ```
 
 See the repository README for clone/run, safety rules, and how the official SDK is wired.
+

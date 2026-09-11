@@ -91,3 +91,4 @@ def load_all_catalog_notes() -> list[OutputRecord]:
         except FetchError:
             continue
     return out
+
