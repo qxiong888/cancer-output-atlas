@@ -163,8 +163,82 @@ def callability_of(rec: OutputRecord) -> str:
     return "metadata_api"
 
 
-def _card_summary(rec: OutputRecord, *, limit: int = _CARD_SUMMARY_MAX) -> str:
-    """English blurb from the record summary. Empty if missing, CJK-heavy, or a title echo."""
+def _overlap_needles(overlap: list[str] | None) -> list[str]:
+    """Chip labels -> searchable tokens (pembrolizumab / Keytruda -> both names)."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in overlap or []:
+        for part in re.split(r"[\/·,;]+", str(raw or "")):
+            tok = part.strip()
+            if len(tok) < 3:
+                continue
+            key = tok.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(tok)
+    return out
+
+
+def _trim_to_limit(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    for sep in (". ", "? ", "! ", "; "):
+        idx = cut.rfind(sep)
+        if idx >= limit // 2:
+            return cut[: idx + 1].rstrip()
+    idx = cut.rfind(" ")
+    if idx >= int(limit * 0.6):
+        return cut[:idx].rstrip(" ,;:") + "…"
+    return cut.rstrip() + "…"
+
+
+def _sentence_at(raw: str, hit: int) -> str:
+    start = 0
+    for sep in (". ", "? ", "! "):
+        idx = raw.rfind(sep, 0, hit)
+        if idx >= start:
+            start = idx + len(sep)
+    end = len(raw)
+    for sep in (". ", "? ", "! "):
+        idx = raw.find(sep, hit)
+        if idx != -1:
+            end = min(end, idx + 1)
+    return raw[start:end].strip()
+
+
+def _window_around(raw: str, hit: int, term_len: int, limit: int) -> str:
+    sent = _sentence_at(raw, hit)
+    if len(sent) <= limit:
+        prefix = ""
+        if raw.find(sent) > 0:
+            prefix = "…"
+        return prefix + sent
+    left = max(0, hit - max(24, (limit - term_len) // 3))
+    right = min(len(raw), left + limit)
+    left = max(0, right - limit)
+    chunk = raw[left:right].strip()
+    if left:
+        sp = chunk.find(" ")
+        if 0 < sp < 40:
+            chunk = chunk[sp + 1 :]
+        chunk = "…" + chunk.lstrip(" ,;:")
+    if right < len(raw):
+        sp = chunk.rfind(" ")
+        if sp >= int(len(chunk) * 0.6):
+            chunk = chunk[:sp]
+        chunk = chunk.rstrip(" ,;:") + "…"
+    return chunk
+
+
+def _card_summary(
+    rec: OutputRecord,
+    *,
+    limit: int = _CARD_SUMMARY_MAX,
+    prefer_terms: list[str] | None = None,
+) -> str:
+    """English blurb. Prefer a window that still shows Matches chip terms."""
     raw = _WS.sub(" ", (rec.summary or "").strip())
     if not raw:
         return ""
@@ -176,15 +250,18 @@ def _card_summary(rec: OutputRecord, *, limit: int = _CARD_SUMMARY_MAX) -> str:
         return ""
     if len(raw) <= limit:
         return raw
-    cut = raw[:limit]
-    for sep in (". ", "? ", "! ", "; "):
-        idx = cut.rfind(sep)
-        if idx >= limit // 2:
-            return cut[: idx + 1].rstrip()
-    idx = cut.rfind(" ")
-    if idx >= int(limit * 0.6):
-        return cut[:idx].rstrip(" ,;:") + "…"
-    return cut.rstrip() + "…"
+    lead = _trim_to_limit(raw, limit)
+    lead_cf = lead.casefold()
+    raw_cf = raw.casefold()
+    for tok in _overlap_needles(prefer_terms):
+        needle = tok.casefold()
+        if needle in lead_cf:
+            continue
+        hit = raw_cf.find(needle)
+        if hit < 0:
+            continue
+        return _window_around(raw, hit, len(tok), limit)
+    return lead
 
 
 def _row_from_ranked(row: dict[str, Any], rec: OutputRecord) -> dict[str, Any]:
@@ -217,7 +294,7 @@ def _row_from_ranked(row: dict[str, Any], rec: OutputRecord) -> dict[str, Any]:
         "callability_zh": CALLABILITY_ZH[tag],
         "source_status": rec.source_status,
     }
-    blurb = _card_summary(rec)
+    blurb = _card_summary(rec, prefer_terms=list(row.get("goal_overlap") or []))
     if blurb:
         hit["summary"] = blurb
     hit["why_short"] = why_short(hit)
