@@ -178,7 +178,6 @@ WEAK_ALONE = frozenset(
         "www",
         "org",
         "com",
-        "seq",
         "omics",
         "meta",
         "unknown",
@@ -190,7 +189,6 @@ WEAK_ALONE = frozenset(
         "non",
         "rate",
         "car",
-        "rna",
         "clinical",
         "arthritis",
         "diabetes",
@@ -241,6 +239,43 @@ TYPE_MAP: dict[str, str] = {
     "biospecimens": "biospecimen",
     "样本": "biospecimen",
 }
+
+
+# Assay / modality phrases kept as a required facet (AND with disease/drug).
+_ASSAY_PHRASE_RES = (
+    re.compile(r"(?i)\b(single[\s-]?cell\s+rna[\s-]?seq|scrna[\s-]?seq|scRNA-seq)\b"),
+    re.compile(r"(?i)\b(bulk\s+rna[\s-]?seq)\b"),
+    re.compile(r"(?i)\b(rna[\s-]?seq|rnaseq|rna\s+sequencing)\b"),
+    re.compile(r"(?i)\b(perturb[\s-]?seq|crop[\s-]?seq)\b"),
+    re.compile(r"(?i)\b(whole[\s-]?exome|wes|wgs|chip[\s-]?seq|atac[\s-]?seq)\b"),
+)
+
+# Imaging-only crumbs: drop when an RNA/seq assay facet is required.
+_IMAGING_ONLY_RE = re.compile(
+    r"(?i)\b(tcia|dicom|dbt|digital\s+breast\s+tomosynthesis|mammograph|radiolog|"
+    r"imaging\s+archive|pixel\s+data|mri|ct\s+scan|pet[\s-]?ct)\b"
+)
+
+# Drug / therapy facet families: within a family, any synonym satisfies the facet.
+_DRUG_FACET_GROUPS: tuple[frozenset[str], ...] = (
+    frozenset({"pembrolizumab", "keytruda", "mk-3475", "mk3475"}),
+    frozenset({"nivolumab", "opdivo"}),
+    frozenset({"immunotherapy", "immuno", "checkpoint", "pd-1", "pd1", "pd-l1", "pdl1"}),
+)
+
+_DISEASE_FACET_GROUPS: tuple[frozenset[str], ...] = (
+    frozenset({"breast", "breastcancer", "breast cancer"}),
+    frozenset({
+        "nsclc",
+        "non small cell lung",
+        "non-small cell lung",
+        "nonsmallcelllung",
+        "lung adenocarcinoma",
+        "lungadenocarcinoma",
+        "luad",
+        "lusc",
+    }),
+)
 
 DISTINCTIVE = frozenset(
     {
@@ -345,6 +380,8 @@ class GoalQuery:
     topic_text: str
     empty: bool
     source: str
+    # AND facets: each inner tuple is OR-synonyms; every group must match the record.
+    required_facets: tuple[tuple[str, ...], ...] = ()
 
 
 def _norm(text: str) -> str:
@@ -642,6 +679,186 @@ def _doi_from_goal(raw: str) -> str | None:
     return doi
 
 
+
+def _extract_assay_phrases(raw: str) -> list[str]:
+    """Keep hyphenated assay phrases before _norm splits them apart."""
+    found: list[str] = []
+    seen: set[str] = set()
+    for cre in _ASSAY_PHRASE_RES:
+        for m in cre.finditer(raw or ""):
+            ph = _norm(m.group(1))
+            if ph and ph not in seen:
+                seen.add(ph)
+                found.append(ph)
+    return found
+
+
+def _facet_groups_from_goal(raw: str, phrases: list[str], tokens: list[str]) -> tuple[tuple[str, ...], ...]:
+    """Build AND facets: disease, drug/therapy families, assay phrases."""
+    blob_parts = [_norm(raw)] + [_norm(p) for p in phrases] + [_norm(t) for t in tokens]
+    blob = " ".join(blob_parts)
+    compact = _compact(blob)
+    bag = set(_latin_tokens(blob))
+    for p in phrases:
+        bag.add(_norm(p))
+        bag.add(_compact(p))
+    facets: list[tuple[str, ...]] = []
+
+    # Disease groups present in the goal
+    for group in _DISEASE_FACET_GROUPS:
+        hit = False
+        syns: list[str] = []
+        for g in group:
+            syns.append(g)
+            ng = _norm(g)
+            cg = _compact(g)
+            if ng in bag or (cg and cg in compact) or ng in blob:
+                hit = True
+        if hit:
+            # expand NSCLC group with phrase forms already in query phrases
+            facets.append(tuple(sorted(set(syns), key=lambda s: (-len(s), s))))
+
+    # Drug / therapy: pembrolizumab OR keytruda is one facet; immunotherapy another if present
+    for group in _DRUG_FACET_GROUPS:
+        present = []
+        for g in group:
+            ng = _norm(g)
+            cg = _compact(g)
+            if ng in bag or ng in blob or (len(cg) >= 4 and cg in compact):
+                present.append(g)
+        if present:
+            # facet satisfied by any synonym in the full group (keytruda counts for pembrolizumab facet)
+            facets.append(tuple(sorted(group, key=lambda s: (-len(s), s))))
+
+    # Assay phrases from raw (pre-norm)
+    # Drop generic+assay junk bigrams ("cancer rna") — assay is a separate AND facet.
+    _assay_bits = {"rna", "seq", "rnaseq", "scrna", "sequencing"}
+    phrases = [
+        ph
+        for ph in phrases
+        if not (
+            " " in ph
+            and any(a in _norm(ph).split() for a in _assay_bits)
+            and any(g in _norm(ph).split() for g in GENERIC_ALONE)
+        )
+    ]
+    assays = _extract_assay_phrases(raw)
+    if assays:
+        # one assay facet: any extracted assay form
+        facets.append(tuple(assays))
+
+    # Dedup identical facet tuples
+    out: list[tuple[str, ...]] = []
+    seen_f: set[tuple[str, ...]] = set()
+    for f in facets:
+        key = tuple(sorted({_norm(x) for x in f}))
+        if key in seen_f:
+            continue
+        seen_f.add(key)
+        out.append(f)
+    return tuple(out)
+
+
+def _record_blob(rec: OutputRecord) -> str:
+    fields = _field_blobs(rec)
+    assay = getattr(rec, "assay", None) or ""
+    return _norm(" ".join([fields["title"], fields["summary"], fields["ids"], fields["landing"], assay]))
+
+
+def _facet_matches_record(
+    facet: tuple[str, ...],
+    blob: str,
+    compact: str,
+    *,
+    title_blob: str = "",
+    title_compact: str = "",
+    prefer_title_for_short: bool = False,
+) -> bool:
+    """Match a facet against record text. Short disease unigrams (breast) prefer title."""
+    for syn in facet:
+        ns = _norm(syn)
+        cs = _compact(syn)
+        if not ns:
+            continue
+        # Multiword / compact disease forms: allow full blob
+        if " " in ns or len(cs) >= 10:
+            if ns in blob or (cs and cs in compact):
+                return True
+            continue
+        # Drug-like tokens (>=6) can match full blob
+        if len(ns) >= 6 and not prefer_title_for_short:
+            if f" {ns} " in f" {blob} " or ns in blob.split() or (cs and cs in compact):
+                return True
+            continue
+        # Short disease unigrams: title (or title-equivalent) only — avoid summary name-drops
+        tb = title_blob or blob
+        tc = title_compact or compact
+        if f" {ns} " in f" {tb} " or tb.startswith(ns + " ") or tb.endswith(" " + ns) or tb == ns:
+            return True
+        if ns in tb.split():
+            return True
+        if len(cs) >= 6 and cs in tc:
+            return True
+    return False
+
+
+def _is_disease_facet(facet: tuple[str, ...]) -> bool:
+    joined = " ".join(_norm(s) for s in facet)
+    keys = ("breast", "nsclc", "lung", "luad", "lusc", "melanoma", "ovarian", "prostate")
+    return any(k in joined for k in keys)
+
+
+def _is_assay_facet(facet: tuple[str, ...]) -> bool:
+    joined = " ".join(_norm(s) for s in facet)
+    return any(k in joined for k in ("rna", "seq", "scrna", "perturb", "crop", "wes", "wgs", "atac", "chip"))
+
+
+def _required_facets_pass(rec: OutputRecord, query: GoalQuery) -> bool:
+    facets = getattr(query, "required_facets", ()) or ()
+    if not facets:
+        return True
+    blob = _record_blob(rec)
+    compact = _compact(blob)
+    title_blob = _norm(rec.title or "")
+    title_compact = _compact(title_blob)
+    assay_facet = any(_is_assay_facet(fac) for fac in facets)
+    if assay_facet and _IMAGING_ONLY_RE.search(blob):
+        if not re.search(
+            r"(?i)\b(rna[\s-]?seq|rnaseq|scrna|transcriptom|expression profiling by high throughput sequencing)\b",
+            blob,
+        ):
+            return False
+    for fac in facets:
+        prefer_title = _is_disease_facet(fac) and any(len(_norm(s)) <= 6 and " " not in _norm(s) for s in fac)
+        # Disease facets: require breast cancer / nsclc phrase OR title unigram — not summary-only "breast"
+        if _is_disease_facet(fac):
+            # Disease must appear in the TITLE when an assay facet is also required
+            # (avoid summary name-drops like "renal and breast cancers").
+            scope_blob, scope_compact = blob, compact
+            if assay_facet:
+                scope_blob, scope_compact = title_blob, title_compact
+            multi = tuple(s for s in fac if " " in _norm(s) or len(_compact(s)) >= 10)
+            short = tuple(s for s in fac if s not in multi)
+            ok = False
+            if multi and _facet_matches_record(multi, scope_blob, scope_compact):
+                ok = True
+            elif short and _facet_matches_record(
+                short,
+                scope_blob,
+                scope_compact,
+                title_blob=title_blob,
+                title_compact=title_compact,
+                prefer_title_for_short=True,
+            ):
+                ok = True
+            if not ok:
+                return False
+            continue
+        if not _facet_matches_record(fac, blob, compact, title_blob=title_blob, title_compact=title_compact):
+            return False
+    return True
+
+
 def parse_goal_lexical(goal: str) -> GoalQuery:
     raw = (goal or "").strip()
     doi = _doi_from_goal(raw)
@@ -695,7 +912,43 @@ def parse_goal_lexical(goal: str) -> GoalQuery:
     topic_unigrams = [t for t in raw_left if _is_distinctive(t)]
     phrases = known + extra_phrases + topic_unigrams
     leftover_for_content = [t for t in raw_left if t not in FILLER and not _is_weak_alone(t)]
-    return _build_query(raw, phrases, leftover_for_content, type_filter, (), "lexical")
+    # Drop generic+assay junk bigrams ("cancer rna") — assay is a separate AND facet.
+    _assay_bits = {"rna", "seq", "rnaseq", "scrna", "sequencing"}
+    phrases = [
+        ph
+        for ph in phrases
+        if not (
+            " " in ph
+            and any(a in _norm(ph).split() for a in _assay_bits)
+            and any(g in _norm(ph).split() for g in GENERIC_ALONE)
+        )
+    ]
+    # Preserve assay phrases that _norm would split (rna-seq → rna + seq).
+    assays = _extract_assay_phrases(raw)
+    for a in assays:
+        if a not in phrases:
+            phrases.append(a)
+        for tok in a.split():
+            if tok not in leftover_for_content and tok not in FILLER:
+                leftover_for_content.append(tok)
+    q = _build_query(raw, phrases, leftover_for_content, type_filter, (), "lexical")
+    facets = _facet_groups_from_goal(raw, list(q.phrases), list(q.content_tokens))
+    if facets:
+        q = GoalQuery(
+            raw=q.raw,
+            phrases=q.phrases,
+            content_tokens=q.content_tokens,
+            non_generic=q.non_generic,
+            generic_paired=q.generic_paired,
+            core_non_generic=q.core_non_generic,
+            type_filter=q.type_filter,
+            must_not=q.must_not,
+            topic_text=q.topic_text,
+            empty=q.empty,
+            source=q.source,
+            required_facets=facets,
+        )
+    return q
 
 
 
@@ -743,6 +996,7 @@ def _slots_to_query(goal: str, slots: dict[str, Any], lexical: GoalQuery) -> Goa
 @lru_cache(maxsize=64)
 def parse_goal(goal: str) -> GoalQuery:
     lexical = parse_goal_lexical(goal)
+    q = lexical
     try:
         from cancer_output_atlas.goal_slots import try_llm_slots
         from cancer_output_atlas.model_config import model_ready
@@ -750,10 +1004,27 @@ def parse_goal(goal: str) -> GoalQuery:
         if model_ready():
             slots = try_llm_slots(goal)
             if slots:
-                return _slots_to_query(goal, slots, lexical)
+                q = _slots_to_query(goal, slots, lexical)
     except Exception:
         pass
-    return lexical
+    # Always attach AND facets from the raw goal (disease ∧ drug ∧ assay).
+    facets = _facet_groups_from_goal(q.raw, list(q.phrases), list(q.content_tokens))
+    if facets and facets != getattr(q, "required_facets", ()):
+        q = GoalQuery(
+            raw=q.raw,
+            phrases=q.phrases,
+            content_tokens=q.content_tokens,
+            non_generic=q.non_generic,
+            generic_paired=q.generic_paired,
+            core_non_generic=q.core_non_generic,
+            type_filter=q.type_filter,
+            must_not=q.must_not,
+            topic_text=q.topic_text,
+            empty=q.empty,
+            source=q.source,
+            required_facets=facets,
+        )
+    return q
 
 
 def _field_blobs(rec: OutputRecord) -> dict[str, str]:
@@ -997,6 +1268,8 @@ def _topic_gate(rec: OutputRecord, query: GoalQuery) -> _Match | None:
     ods = _ods_of(rec)
     if query.type_filter and ods not in query.type_filter:
         return None
+    if not _required_facets_pass(rec, query):
+        return None
     return _Match(phrase_field=phrase_field, phrase_hit=phrase_hit, ods=ods)
 
 
@@ -1216,7 +1489,8 @@ def rank_records(
         ods = _ods_of(rec)
         if q.type_filter and ods not in q.type_filter:
             continue
-        if cancer_goal and ods in _PAN_CANCER_ODS:
+        # Multi-facet AND goals: never pad with cross-cancer catalog attach.
+        if cancer_goal and ods in _PAN_CANCER_ODS and not getattr(q, "required_facets", ()):
             attached.append(
                 (rec, _Match(phrase_field="", phrase_hit="", ods=ods, pan_cancer=True))
             )
