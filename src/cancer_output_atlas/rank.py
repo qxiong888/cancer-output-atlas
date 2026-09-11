@@ -1032,19 +1032,45 @@ def _required_facets_pass(rec: OutputRecord, query: GoalQuery) -> bool:
             fac_n = {_norm(s) for s in fac}
             wants_scrna = any(n in _SCRNA_NORM or n.startswith("single cell") for n in fac_n)
             has_broad_rna = any(n in _RNA_SEQ_NORM or n in _BULK_RNA_NORM for n in fac_n)
+            title = rec.title or ""
+            assay_mod = f"{getattr(rec, 'assay', None) or ''} {getattr(rec, 'modality', None) or ''}"
+            title_scrna = bool(
+                re.search(r"(?i)\b(single[\s-]?cell|scRNA|scrna[\s-]?seq|sc[\s-]?rna)\b", title)
+            )
+            # GEO series tags in titles are authoritative over summary name-drops.
+            title_bulk_tag = bool(
+                re.search(r"(?i)\[(?:bulk\s+)?rna[\s-]?seq\]", title)
+            ) and not title_scrna
+            title_chromatin = bool(
+                re.search(
+                    r"(?i)\[(ChIP[\s-]?seq|ATAC[\s-]?seq|Hi[\s-]?C|CUT\.?\&?RUN|WGBS)\]",
+                    title,
+                )
+            )
+            assay_chromatin = bool(
+                re.search(
+                    r"(?i)(genome binding|occupancy profiling|chip[\s-]?seq|atac[\s-]?seq)",
+                    assay_mod,
+                )
+            ) and not re.search(
+                r"(?i)expression profiling",
+                assay_mod,
+            )
             if wants_scrna and not has_broad_rna:
-                if not re.search(
-                    r"(?i)\b(single[\s-]?cell|scRNA|scrna[\s-]?seq|sc[\s-]?rna)\b",
-                    blob,
-                ):
+                if title_bulk_tag or title_chromatin:
+                    return False
+                # Require single-cell evidence in TITLE (not summary-only leaks).
+                if not title_scrna:
                     return False
             elif has_broad_rna or wants_scrna:
-                # Reject chromatin-only assays posing as RNA-seq
-                if re.search(r"(?i)\b(chip[\s-]?seq|atac[\s-]?seq)\b", blob) and not re.search(
-                    r"(?i)\b(rna[\s-]?seq|rnaseq|scrna|transcriptom|rna sequencing)\b",
-                    blob,
-                ):
+                # RNA-seq goals must not pass ChIP/ATAC-primary series.
+                if title_chromatin or assay_chromatin:
                     return False
+                # Bracketed GEO series tags without RNA/transcript cue (e.g. CRISPRI_SCREEN).
+                for m in re.finditer(r"\[([^\]]+)\]", title):
+                    tag = m.group(1).lower()
+                    if not re.search(r"rna|scrna|transcript|expression|mrna", tag):
+                        return False
         if not _facet_matches_record(fac, blob, compact, title_blob=title_blob, title_compact=title_compact):
             return False
     return True

@@ -70,3 +70,8 @@ def test_broad_rnaseq_chip_not_scrna():
     labs = _labels("breast cancer RNA-seq")
     assert "breast cancer" in labs and "rna-seq" in labs
     assert "scRNA-seq" not in labs
+
+
+def test_scrna_chip_label_strict():
+    labs = _labels("lung cancer single-cell RNA-seq")
+    assert labs.count("scRNA-seq") == 1
