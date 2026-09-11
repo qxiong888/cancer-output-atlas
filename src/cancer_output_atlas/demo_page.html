@@ -85,7 +85,7 @@
   </form>
   <p class="fine">Public metadata only. Controlled data is a pointer, not a download. Not for diagnosis, treatment, or prescribing.</p>
   <div id="results"></div>
-  <p class="fine feedback"><a id="report-issue" href="mailto:hello@swarmoraai.com">Report an issue</a></p>
+  <p class="fine feedback"><a id="report-issue" href="https://forms.gle/74ZSkuRANyT6Javw5" target="_blank" rel="noopener noreferrer">Report an issue</a></p>
 </main>
 <script type="application/json" id="fallback-a">__FALLBACK_A__</script>
 <script>
@@ -116,21 +116,13 @@
   var reportLink = document.getElementById("report-issue");
   goalBox.value = DEFAULT_GOAL;
 
+  var REPORT_FORM = "https://forms.gle/74ZSkuRANyT6Javw5";
   function updateReportLink() {
     if (!reportLink) return;
-    var goal = String(goalBox.value || "").trim();
-    var subject = "Cancer Output Atlas — issue report";
-    var body =
-      "What went wrong:\n\n\n" +
-      "Goal:\n" + goal + "\n\n" +
-      "(Optional) Result title or URL that looked wrong:\n";
-    reportLink.href =
-      "mailto:hello@swarmoraai.com" +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body);
+    // Public form only — no email on the page. Goal field is filled by the user on the form.
+    reportLink.href = REPORT_FORM;
   }
   updateReportLink();
-  goalBox.addEventListener("input", updateReportLink);
 
   function esc(s) {
     return String(s == null ? "" : s)
