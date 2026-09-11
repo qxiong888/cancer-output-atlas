@@ -1489,8 +1489,9 @@ def rank_records(
         ods = _ods_of(rec)
         if q.type_filter and ods not in q.type_filter:
             continue
-        # Multi-facet AND goals: never pad with cross-cancer catalog attach.
-        if cancer_goal and ods in _PAN_CANCER_ODS and not getattr(q, "required_facets", ()):
+        # Pan-cancer catalog tools (software/tool/method/model/biospecimen) still attach
+        # on cancer-type goals. Data/trials stay on the AND topic gate below.
+        if cancer_goal and ods in _PAN_CANCER_ODS:
             attached.append(
                 (rec, _Match(phrase_field="", phrase_hit="", ods=ods, pan_cancer=True))
             )
