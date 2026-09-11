@@ -2,7 +2,7 @@
 
 **Apache-2.0** · [Agents for Humans](https://agentsforhumans.devpost.com/) · Professional Agents
 
-An agent that turns a researcher's reuse goal into a short list of **already-public cancer research outputs** they can actually open — datasets, software, workflows, models, trial records, and biospecimen pointers — grouped by [NCI ODS](https://datascience.cancer.gov/) output type.
+An agent that turns a researcher's reuse goal into a short list of **already-public cancer research outputs** they can actually open — datasets, software, workflows, models, trial records, and biospecimen pointers — grouped by output-type labels aligned with the NCI ODS Impact Prize definition of a [cancer research output](https://www.nih.gov/challenges/nci-office-data-sharing-impact-prize) (data, software, tools, methods/protocols, models, clinical trial results, biospecimens). Not an NCI product or endorsement.
 
 It does **not** invent GEO, NCT, DOI, or other accessions. If the baked graph has no match, it **abstains**.
 
