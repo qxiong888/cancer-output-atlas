@@ -20,7 +20,7 @@ Cancer Output Atlas addresses that need through a maintained graph of research r
 2. Parses it into topic / type slots (`parse_goal`).
 3. On live Cloud Run, constructs an official **Strands** `Agent` that must call `find_public_outputs` against the current graph snapshot.
 4. Returns stored resource identifiers and source links, grouped by ODS type (data, software, tool, method, model, trial result, biospecimen).
-5. Agents harvest allow-listed public metadata offline and refresh the graph **daily**, so coverage grows over time.
+5. Agents run a **batch daily harvest** of allow-listed public metadata and refresh the graph, so coverage grows over time.
 
 This comparison covers standard web search and language models used without external retrieval. Honesty rules are collected in [Safety](#safety).
 
@@ -55,7 +55,7 @@ flowchart LR
   H -->|no| X
 ```
 
-The find path ranks the **current** baked `out/link_graph.json` (the daily-refreshed living catalog). New resources enter the catalog through the offline daily harvest, not through the request path.
+The find path ranks the **current** baked `out/link_graph.json` (the daily-refreshed living catalog). New resources enter the catalog through the batch daily harvest, not through the request path.
 
 ```mermaid
 flowchart TB
@@ -177,7 +177,7 @@ This product is public research-output metadata. It is **not** clinical advice. 
 
 - **Public metadata only.** NCBI E-utilities, Figshare, ClinicalTrials.gov API v2, cBioPortal `/api/studies`, Dockstore TRS, GDC `/projects`, TCIA collection *names*, nf-core `pipelines.json`, Europe PMC REST, GitHub search. No scraping of paywalled pages.
 - **Never invent** GEO, SRA, DOI, NCT, or other accessions. If it was not on the landing or in the API payload, it is not in the atlas. When the current graph snapshot has no match, find **abstains** instead of fabricating an ID.
-- **No on-click ingest. No claim graph.** Each find ranks the current baked snapshot (`out/link_graph.json`). It does not call GEO or other catalog APIs at query time. New nodes enter through the offline daily harvest.
+- **No on-click ingest. No claim graph.** Each find ranks the current baked snapshot (`out/link_graph.json`). It does not call GEO or other catalog APIs at query time. New nodes enter through the batch daily harvest.
 - **Skip on fetch failure.** No guessed records.
 - **No PHI. No dbGaP file download.** `phs######` / “controlled access” are refused as fetch targets. Controlled resources (dbGaP, HTAN sequencing, GDC BAM, COSMIC tables) appear only as apply-yourself pointers.
 - **Do not download** `.h5ad` / BAM / FASTQ / MTX / VCF / DICOM or other omics payloads. Figshare file *names* may be listed from metadata.
